@@ -15,7 +15,7 @@ import sys
 
 def sense_brightness(image, columns):
 	'''Maps a sensor reading to a wheel motor command'''
-	## TODO: Test that this function works and decide on the number of rows to use
+	## TODO: Test that this function works and decide on the number of columns to use
 
 	h = image.shape[0]
 	w = image.shape[1]
@@ -25,7 +25,7 @@ def sense_brightness(image, columns):
 		for x in columns:
 			avg_brightness += image[y,x]
 
-	avg_brightness /= (h*rows.shape[0])
+	avg_brightness /= (h*columns.shape[0])
 
 	return avg_brightness
 
@@ -55,8 +55,8 @@ async def braitenberg_machine(robot: cozmo.robot.Robot):
 		sensor_n_columns = 20
 
 		# Sense the current brightness values on the right and left of the image.
-		sensor_right = sense_brightness(opencv_image, rows=np.arange(sensor_n_columns))
-		sensor_left = sense_brightness(opencv_image, rows=np.arange(w-sensor_n_columns, w))
+		sensor_right = sense_brightness(opencv_image, columns=np.arange(sensor_n_columns))
+		sensor_left = sense_brightness(opencv_image, columns=np.arange(w-sensor_n_columns, w))
 
 		print("sensor_right: " + str(sensor_right))
 		print("sensor_left: " + str(sensor_left))

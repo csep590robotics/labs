@@ -10,12 +10,18 @@ sys.path.insert(0, '../lab4')
 import find_ball
 
 import cozmo
-
+from cozmo.util import degrees, distance_mm, speed_mmps
 try:
     from PIL import ImageDraw, ImageFont
 except ImportError:
     sys.exit('run `pip3 install --user Pillow numpy` to run this example')
 
+from enum import Enum
+
+class BotState(Enum):
+	SEARCHING = 1
+	HUNTING = 2
+	HITTING = 3
 
 # Define a decorator as a subclass of Annotator; displays battery voltage
 class BatteryAnnotator(cozmo.annotate.Annotator):
@@ -57,9 +63,12 @@ async def run(robot: cozmo.robot.Robot):
     robot.world.image_annotator.add_annotator('battery', BatteryAnnotator)
     robot.world.image_annotator.add_annotator('ball', BallAnnotator)
 
-
+    currentState = BotState.SEARCHING
+    cameraFOV = [60,60];
+    Kp = [0.25, 0.01]
+    baseTranslationSpeed = 13
+    radiusThreshold = 125
     try:
-
         while True:
             #get camera image
             event = await robot.world.wait_for(cozmo.camera.EvtNewRawCameraImage, timeout=30)
@@ -73,7 +82,37 @@ async def run(robot: cozmo.robot.Robot):
             #set annotator ball
             BallAnnotator.ball = ball
 
-            ## TODO: ENTER YOUR SOLUTION HERE
+            
+            if(currentState is BotState.SEARCHING):
+                if(ball is not None):
+                    currentState = BotState.HUNTING
+                else:
+                    await robot.set_lift_height(1.0).wait_for_completed()
+                    await robot.set_head_angle(cozmo.util.Angle(degrees=0.0)).wait_for_completed()
+                    await robot.drive_wheels(int(baseTranslationSpeed), int(-1.0 * baseTranslationSpeed))
+            elif(currentState is BotState.HUNTING):
+                if(ball is not None):
+                    imageSizePixels = [320, 240]
+                    errorPixels = [(imageSizePixels[0] / 2) - ball[0], (imageSizePixels[1] / 2) - ball[1]]
+                    errorNormalizedLinearDegrees = [(errorPixels[0] / (imageSizePixels[0] / 2)) * cameraFOV[0], (errorPixels[1] / (imageSizePixels[1] / 2)) * cameraFOV[1]]
+                    proportionalComponent = [errorNormalizedLinearDegrees[0] * Kp[0], errorNormalizedLinearDegrees[1] * Kp[1]]
+                    
+                    robot.move_head(proportionalComponent[1])
+                    await robot.drive_wheels(int(baseTranslationSpeed - proportionalComponent[0]), int(baseTranslationSpeed + proportionalComponent[0]))
+                    print('cur radius:' + str(ball[2]))
+                    if(ball[2] > radiusThreshold):
+                        robot.stop_all_motors()
+                        currentState = BotState.HITTING
+                else:
+                    robot.stop_all_motors()
+                    currentState = BotState.SEARCHING
+            elif(currentState is BotState.HITTING):
+                await robot.set_lift_height(0.0).wait_for_completed()
+                await robot.set_lift_height(1.0).wait_for_completed()
+                currentState = BotState.SEARCHING
+            print(str(currentState))
+
+            ## TODO: ENTER YOUR SOLUTION HEREx
 
 
     except KeyboardInterrupt:

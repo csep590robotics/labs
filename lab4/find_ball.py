@@ -12,7 +12,7 @@ except ImportError:
     sys.exit('install Pillow to run this code')
 
 
-def find_ball(opencv_image, debug=False):
+def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=120, minDist=40):
     """Find the ball in an image.
 
             Arguments:
@@ -25,9 +25,82 @@ def find_ball(opencv_image, debug=False):
 
     ball = None
 
-    # TODO: INSERT YOUR SOLUTION HERE
+    gray_image = get_gray_image(opencv_image)
+    circles = try_find_ball(gray_image, debug, threshold,
+                            delta, guessDP, minCircle, maxCircle, minDist)
+
+    if circles is None:
+        ball = np.array([0, 0, 0])
+        debugLog("Result - Didn't find any ball", debug)
+    else:
+        ball = np.round(circles[0, :]).astype("int")
+        debugLog(f"Result - Find the ball: {ball}", debug)
+
+    if (debug):
+        display_circles(opencv_image, [ball], best)
 
     return ball
+
+
+def get_gray_image(image):
+    try:
+        return cv2.cvtColor(opencv_image, cv2.COLOR_RGB2GRAY)
+    except:
+        return image
+
+
+def debugLog(message, debug=False):
+    if (debug):
+        print(message)
+
+
+def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=90, minDist=40):
+    number_of_circles_expected = 1
+
+    minimum_circle_size = minCircle
+    maximum_circle_size = maxCircle
+    guess_dp = guessDP
+    guess_accumulator_array_threshold = threshold
+
+    circles = None
+
+    debugLog("Start find the ball in image with these parameters:", debug)
+    debugLog(f"minimum circle size: {minimum_circle_size}", debug)
+    debugLog(f"maximum circle size: {maximum_circle_size}", debug)
+    debugLog(f"guess dp:            {guess_dp}", debug)
+    debugLog(f"maximum threshold:   {guess_accumulator_array_threshold}", debug)
+    debugLog(f"minimum threshold:   {threshold - delta}", debug)
+
+    while guess_accumulator_array_threshold > threshold - delta:
+        guess_radius = maximum_circle_size
+        debugLog(f"adjust the threshold, and resetting guess_radius", debug)
+
+        while guess_radius >= minimum_circle_size:
+            circles = cv2.HoughCircles(
+                gray_image, cv2.cv2.HOUGH_GRADIENT,
+                dp=guess_dp,
+                minDist=minDist,
+                param1=50,
+                param2=guess_accumulator_array_threshold,
+                minRadius=(guess_radius - 3),
+                maxRadius=(guess_radius + 3)
+            )
+
+            if circles is not None:
+                if len(circles[0]) == number_of_circles_expected:
+                    debugLog(f"Find one circle with guessing radius: {guess_radius} and dp: {guess_dp} vote threshold: {guess_accumulator_array_threshold}")
+                    return copy.copy(circles[0])
+                else:
+                    debugLog(f"Find {len(circles[0])} circles with guessing radius: {guess_radius} and dp: {guess_dp} vote threshold: {guess_accumulator_array_threshold}, skip it", debug)
+
+                circles = None
+            else:
+                debugLog(f"Didn't find circles with guessing radius: {guess_radius} and dp: {guess_dp} vote threshold: {guess_accumulator_array_threshold}", debug)
+
+            guess_radius -= 3
+
+        guess_accumulator_array_threshold -= 2
+    return None
 
 
 def display_circles(opencv_image, circles, best=None):

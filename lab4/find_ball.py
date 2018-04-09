@@ -24,8 +24,32 @@ def find_ball(opencv_image, debug=False):
 	"""
 
 	ball = None
-	
-	## TODO: INSERT YOUR SOLUTION HERE
+
+	#first, blur the image using median blurring.
+	#this will help remove the effects of salt-and-pepper noise on the image
+
+	# we use a K of 13 for the median blur
+	# this K was derived from a simulated annealing based constrained optimization routine
+	medianBlurredImage = cv2.medianBlur(opencv_image, 13);
+
+	#next, perform canny edge detection and transform into Hough circle space
+
+	# the Canny parameters and Hough min/max redius were derived from 
+	# the same simulated annealing based constrained optimization routine as the median blur filer's K param
+	circles = cv2.HoughCircles(
+		medianBlurredImage,
+		cv2.HOUGH_GRADIENT,
+		1,
+		minDist=100,
+		param1=66,
+		param2=29,
+		minRadius=6,
+		maxRadius=132)
+
+	#take the first circle returned (the one with highest confidence)
+	if(circles is not None):
+		circles = np.uint16(np.around(circles))
+		return circles[0][0]
 	
 	return ball
 

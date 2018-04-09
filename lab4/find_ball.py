@@ -12,7 +12,7 @@ except ImportError:
     sys.exit('install Pillow to run this code')
 
 
-def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=120, minDist=40):
+def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, guessDP=1.55, minCircle=5, maxCircle=160, minDist=40):
     """Find the ball in an image.
 
             Arguments:
@@ -54,7 +54,7 @@ def debugLog(message, debug=False):
         print(message)
 
 
-def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=90, minDist=40):
+def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55, minCircle=5, maxCircle=160, minDist=40):
     number_of_circles_expected = 1
 
     minimum_circle_size = minCircle

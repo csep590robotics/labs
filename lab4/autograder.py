@@ -26,7 +26,7 @@ for filedata in grid_data:
 	 
 	#try to find the ball in the image
 	ball = find_ball.find_ball(opencv_image)
-	print(file, ball)
+	print(file, filedata[1],filedata[2],filedata[3])
 	
 	if ball is None:
 		ball = np.array([0, 0, 0])

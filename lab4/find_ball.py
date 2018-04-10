@@ -26,7 +26,17 @@ def find_ball(opencv_image, debug=False):
 	ball = None
 	
 	## TODO: INSERT YOUR SOLUTION HERE
-	
+	blur = cv2.GaussianBlur(opencv_image,(9,9),0,0)
+	circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, 1.3,70,param1=140,param2=47,minRadius=10,maxRadius=100)
+	#circles = np.round(circles[0, :]).astype("int")
+	if circles is None:
+		ball = [0,0,0]
+	else :
+		ball = circles[0][0]
+	if debug is True:
+		display_circles(opencv_image, circles)
+	print("circles",circles)
+	print("ball",ball)
 	return ball
 
 

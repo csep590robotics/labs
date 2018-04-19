@@ -10,10 +10,10 @@ from cozmo.util import degrees, Angle, Pose, distance_mm, speed_mmps
 import math
 import time
 import sys
-from pose_transform import get_relative_pose
 
-sys.path.insert(0, '../lab6')
 from odometry import cozmo_go_to_pose
+sys.path.insert(0, '../lab6')
+from pose_transform import get_relative_pose
 
 def move_relative_to_cube(robot: cozmo.robot.Robot):
 	'''Looks for a cube while sitting still, when a cube is detected it 

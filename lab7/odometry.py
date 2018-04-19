@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Stater code for Lab 6.
+Stater code for Lab 7.
 
 '''
 
@@ -41,10 +41,10 @@ def cozmo_go_to_pose(robot, x, y, angle_z):
 
 # Functions to be defined as part of the labs
 
-def get_back_wheel_radius():
-	"""Returns the radius of the Cozmo robot's back wheel in millimeters."""
+def get_front_wheel_radius():
+	"""Returns the radius of the Cozmo robot's front wheel in millimeters."""
 	# ####
-	# TODO: Empirically determine the radius of the robot's back wheel using the
+	# TODO: Empirically determine the radius of the robot's front wheel using the
 	# cozmo_drive_straight() function. You can write a separate script for doing 
 	# experiments to determine the radius. This function should return the radius
 	# in millimeters. Write a comment that explains how you determined it and any
@@ -55,7 +55,7 @@ def get_back_wheel_radius():
 def get_distance_between_wheels():
 	"""Returns the distance between the wheels of the Cozmo robot in millimeters."""
 	# ####
-	# TODO: Empirically determine the distance between the wheels of the robot
+	# TODO: Empirically determine the distance between the wheels of the robot using
 	# robot.drive_wheels() function. Write a comment that explains how you determined
 	# it and any computation you do as part of this function.
 	# ####
@@ -107,8 +107,8 @@ def my_go_to_pose1(robot, x, y, angle_z):
 	# ####
 	# TODO: Implement a function that makes the robot move to a desired pose
 	# using the my_drive_straight and my_turn_in_place functions. This should
-	# Include a sequence of turning in place, moving straight, and then turning
-	# again at the target to get to the desired rotation.
+	# include a sequence of turning in place, moving straight, and then turning
+	# again at the target to get to the desired rotation (Approach 1).
 	# ####
 	pass
 
@@ -122,7 +122,7 @@ def my_go_to_pose2(robot, x, y, angle_z):
 	# ####
 	# TODO: Implement a function that makes the robot move to a desired pose
 	# using the robot.drive_wheels() function to jointly move and rotate the 
-	# robot to reduce distance between current and desired pose.
+	# robot to reduce distance between current and desired pose (Approach 2).
 	# ####
 	pass
 
@@ -142,7 +142,7 @@ def my_go_to_pose3(robot, x, y, angle_z):
 
 def run(robot: cozmo.robot.Robot):
 
-	print("***** Back wheel radius: " + str(get_back_wheel_radius()))
+	print("***** Back wheel radius: " + str(get_front_wheel_radius()))
 	print("***** Distance between wheels: " + str(get_distance_between_wheels()))
 
 	## Example tests of the functions

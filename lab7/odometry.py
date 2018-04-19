@@ -61,8 +61,8 @@ def get_distance_between_wheels():
 	# ####
 	pass
 
-def rotate_back_wheel(robot, angle_deg):
-	"""Rotates the back wheel of the robot by a desired angle.
+def rotate_front_wheel(robot, angle_deg):
+	"""Rotates the front wheel of the robot by a desired angle.
 		Arguments:
 		robot -- the Cozmo robot instance passed to the function
 		angle_deg -- Desired rotation of the wheel in degrees
@@ -142,7 +142,7 @@ def my_go_to_pose3(robot, x, y, angle_z):
 
 def run(robot: cozmo.robot.Robot):
 
-	print("***** Back wheel radius: " + str(get_front_wheel_radius()))
+	print("***** Front wheel radius: " + str(get_front_wheel_radius()))
 	print("***** Distance between wheels: " + str(get_distance_between_wheels()))
 
 	## Example tests of the functions
@@ -151,7 +151,7 @@ def run(robot: cozmo.robot.Robot):
 	cozmo_turn_in_place(robot, 60, 30)
 	cozmo_go_to_pose(robot, 100, 100, 45)
 
-	rotate_back_wheel(robot, 90)
+	rotate_front_wheel(robot, 90)
 	my_drive_straight(robot, 62, 50)
 	my_turn_in_place(robot, 90, 30)
 

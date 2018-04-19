@@ -10,7 +10,7 @@ import cozmo
 import numpy
 from cozmo.util import degrees
 
-def get_relative_pose(object_pose, refrence_frame_pose):
+def get_relative_pose(object_pose, reference_frame_pose):
 	# ####
 	# TODO: Implement computation of the relative frame using numpy.
 	# Try to derive the equations yourself and verify by looking at

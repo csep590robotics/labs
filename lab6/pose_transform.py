@@ -8,17 +8,45 @@ This is starter code for Lab 6 on Coordinate Frame transforms.
 import asyncio
 import cozmo
 import numpy
+import math
 import time
 from cozmo.util import degrees
 
 
 def get_relative_pose(object_pose, reference_frame_pose):
-    # ####
-    # TODO: Implement computation of the relative frame using numpy.
-    # Try to derive the equations yourself and verify by looking at
-    # the books or slides before implementing.
-    # ####
-    return None
+    # Point R as Robot, Point C as Cube, x as world X axis, x' as robot X axis
+    # tan(RCx) = (cube_y - robot_y) / (cube_x - robot_x)
+    # theta = RCx = atan((cube_y - robot_y) / (cube_x - robot_x))
+    # RCx' = robot_angle - RCx
+    #
+    # ==>
+    #
+    # related_x = cos(RCx') * sqrt((cube_y - robot_y)^2 + (cube_x - robot_x)^2)
+    # related_y = -sin(RCx') * sqrt((cube_y - robot_y)^2 + (cube_x - robot_x)^2)
+    cube_x = object_pose.position.x
+    cube_y = object_pose.position.y
+    cube_angle_z = object_pose.rotation.angle_z
+
+    robot_x = reference_frame_pose.position.x
+    robot_y = reference_frame_pose.position.y
+    robot_angle_z = reference_frame_pose.rotation.angle_z
+
+    if (cube_x != robot_x):
+        theta = math.atan((cube_y - robot_y) / (cube_x - robot_x))
+    else:
+        if (cube_y > robot_y):
+            theta = math.pi / 2
+        elif (cube_y < robot_y):
+            theta = -math.pi / 2
+
+    angle = robot_angle_z.radians - theta
+    newX = math.cos(angle) * math.sqrt((cube_y - robot_y) *
+                                       (cube_y - robot_y) + (cube_x - robot_x) * (cube_x - robot_x))
+    newY = -math.sin(angle) * math.sqrt((cube_y - robot_y) *
+                                        (cube_y - robot_y) + (cube_x - robot_x) * (cube_x - robot_x))
+    newAngle = cube_angle_z - robot_angle_z
+
+    return cozmo.util.pose_z_angle(newX, newY, 0, angle_z=newAngle, origin_id=object_pose._origin_id)
 
 
 def find_relative_cube_pose(robot: cozmo.robot.Robot):

@@ -62,12 +62,13 @@ def get_front_wheel_radius():
 
 def get_distance_between_wheels():
     """Returns the distance between the wheels of the Cozmo robot in millimeters."""
-    # ####
-    # TODO: Empirically determine the distance between the wheels of the robot using
-    # robot.drive_wheels() function. Write a comment that explains how you determined
-    # it and any computation you do as part of this function.
-    # ####
-    pass
+
+    # The radius was determined by helper/get_distance_between_wheel.py.
+    # Results is in helper/results/get_distance_between_wheel.txt
+    #   The test test with different speed and it's mutiplicatoin
+    #   Also for each speed, test with multiple time with the differnt of duratoin
+    #   The total average is 88.03572726050415
+    return 88
 
 
 def rotate_front_wheel(robot, angle_deg):

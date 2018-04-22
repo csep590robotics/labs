@@ -1,0 +1,57 @@
+2018-04-22 14:11:09,825 cozmo.general INFO     App connection established. sdk_version=1.3.2 cozmoclad_version=2.4.0 app
+_build_version=00002.00004.00000
+2018-04-22 14:11:09,825 cozmo.general INFO     Found robot id=1
+2018-04-22 14:11:09,825 cozmo.general INFO     Connected to iOS device_id=6 serial=3c1bd989ffd91e62f8838c32c68ee18e9fb19
+156
+2018-04-22 14:11:10,012 cozmo.general INFO     Robot id=1 serial=43200e71 initialized OK
+With speed 25 and time 3, the distance between wheels: by phi 71.32654143528542
+With speed 25 and time 4, the distance between wheels: by phi 81.49133547834413
+With speed 25 and time 5, the distance between wheels: by phi 108.35196556173588
+With speed 25 and time 6, the distance between wheels: by phi 69.54664186301441
+Average B: 82.67912108459497 with speed 25
+With speed 50 and time 3, the distance between wheels: by phi 75.85586796805926
+With speed 50 and time 4, the distance between wheels: by phi 100.80338897708914
+With speed 50 and time 5, the distance between wheels: by phi 79.23928492549723
+With speed 50 and time 6, the distance between wheels: by phi 94.80772083421124
+Average B: 87.67656567621421 with speed 50
+With speed 75 and time 3, the distance between wheels: by phi 80.72408612278954
+With speed 75 and time 4, the distance between wheels: by phi 96.50784230687583
+With speed 75 and time 5, the distance between wheels: by phi 89.23519263798725
+With speed 75 and time 6, the distance between wheels: by phi 80.4277171528434
+Average B: 86.723709555124 with speed 75
+Average B: 85.69313210531107 with test speed from 25, 50, 75
+With speed 30 and time 3, the distance between wheels: by phi 72.16710537158689
+With speed 30 and time 4, the distance between wheels: by phi 90.86587069744184
+With speed 30 and time 5, the distance between wheels: by phi 99.47665919246383
+With speed 30 and time 6, the distance between wheels: by phi 90.0741129149512
+Average B: 88.14593704411095 with speed 30
+With speed 60 and time 3, the distance between wheels: by phi 90.61034035229486
+With speed 60 and time 4, the distance between wheels: by phi 84.66023432007086
+With speed 60 and time 5, the distance between wheels: by phi 92.95561025277264
+With speed 60 and time 6, the distance between wheels: by phi 84.71705676211754
+Average B: 88.23581042181397 with speed 60
+With speed 90 and time 3, the distance between wheels: by phi 81.17766622890768
+With speed 90 and time 4, the distance between wheels: by phi 90.97017714601985
+With speed 90 and time 5, the distance between wheels: by phi 85.26460886647814
+With speed 90 and time 6, the distance between wheels: by phi 93.22139780718193
+Average B: 87.6584625121469 with speed 90
+Average B: 88.01340332602393 with test speed from 30, 60, 90
+With speed 35 and time 3, the distance between wheels: by phi 69.35655410151296
+With speed 35 and time 4, the distance between wheels: by phi 98.94915538595413
+With speed 35 and time 5, the distance between wheels: by phi 85.57310963948716
+With speed 35 and time 6, the distance between wheels: by phi 92.24198493142661
+Average B: 86.5302010145952 with speed 35
+With speed 70 and time 3, the distance between wheels: by phi 79.40373571561284
+With speed 70 and time 4, the distance between wheels: by phi 91.74807163237854
+With speed 70 and time 5, the distance between wheels: by phi 164.288158329758
+With speed 70 and time 6, the distance between wheels: by phi 60.33769326209198
+Average B: 98.94441473496035 with speed 70
+With speed 105 and time 3, the distance between wheels: by phi 78.95391383751799
+With speed 105 and time 4, the distance between wheels: by phi 92.98917101810542
+With speed 105 and time 5, the distance between wheels: by phi 85.23888504730695
+Wrong data, ignore
+Average B: 85.72732330097678 with speed 105
+Average B: 90.40064635017744 with test speed from 35, 70, 105
+Average B: 88.03572726050415
+2018-04-22 14:14:20,319 cozmo.general INFO     Shutting down connection
+2018-04-22 14:14:20,319 cozmo.general INFO     iOS device_id=6 disconnected.

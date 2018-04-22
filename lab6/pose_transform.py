@@ -14,69 +14,71 @@ from cozmo.util import degrees
 
 
 def get_relative_pose(object_pose, reference_frame_pose):
-    # HOMOGENEOUS TRANSFORMS
-    # | cos(robot_angle), -sin(robot_angle), robot_x | | related_x |   | cube_x |
-    # | sin(robot_angle),  cos(robot_angle), robot_y | | related_y | = | cube_y |
-    # |                0,                 0,       1 | |         1 |   |      1 |
+    # Homogeneous Transforms
+    # | cos(ref_angle), -sin(ref_angle), ref_x | | related_x |   | obj_x |
+    # | sin(ref_angle),  cos(ref_angle), ref_y | | related_y | = | obj_y |
+    # |              0,               0,     1 | |         1 |   |     1 |
     #
     # ==>
     #
-    # cos(robot_angle) * related_x - sin(robot_angle) * related_y + robot_x = cube_x
-    # sin(robot_angle) * related_x + cos(robot_angle) * related_y + robot_y = cube_y
+    # cos(ref_angle) * related_x - sin(ref_angle) * related_y + ref_x = obj_x
+    # sin(ref_angle) * related_x + cos(ref_angle) * related_y + ref_y = obj_y
     #
     # ==>
     #
-    # related_x = cos(robot_angle) * (cube_x - robot_x) + sin(robot_angle) * (cube_y - robot_y)
-    # related_y = cos(robot_angle) * (cube_y - robot_y) - sin(robot_angle) * (cube_x - robot_x)
-    cube_x = object_pose.position.x
-    cube_y = object_pose.position.y
-    cube_angle_z = object_pose.rotation.angle_z
+    # related_x = cos(ref_angle) * (obj_x - ref_x) + sin(ref_angle) * (obj_y - ref_y)
+    # related_y = cos(ref_angle) * (obj_y - ref_y) - sin(ref_angle) * (obj_x - ref_x)
+    obj_x = object_pose.position.x
+    obj_y = object_pose.position.y
+    obj_angle_z = object_pose.rotation.angle_z
 
-    robot_x = reference_frame_pose.position.x
-    robot_y = reference_frame_pose.position.y
-    robot_angle = reference_frame_pose.rotation.angle_z
+    ref_x = reference_frame_pose.position.x
+    ref_y = reference_frame_pose.position.y
+    ref_angle_z = reference_frame_pose.rotation.angle_z
 
-    newX = math.cos(robot_angle.radians) * (cube_x - robot_x) + \
-        math.sin(robot_angle.radians) * (cube_y - robot_y)
-    newY = math.cos(robot_angle.radians) * (cube_y - robot_y) - \
-        math.sin(robot_angle.radians) * (cube_x - robot_x)
-    newAngle = cube_angle_z - robot_angle
+    newX = math.cos(ref_angle_z.radians) * (obj_x - ref_x) + \
+        math.sin(ref_angle_z.radians) * (obj_y - ref_y)
+    newY = math.cos(ref_angle_z.radians) * (obj_y - ref_y) - \
+        math.sin(ref_angle_z.radians) * (obj_x - ref_x)
+    newAngle = obj_angle_z - ref_angle_z
 
     return cozmo.util.pose_z_angle(newX, newY, 0, angle_z=newAngle, origin_id=object_pose._origin_id)
 
 
 def get_relative_pose2(object_pose, reference_frame_pose):
     # Point R as Robot, Point C as Cube, x as world X axis, x' as robot X axis
-    # tan(RCx) = (cube_y - robot_y) / (cube_x - robot_x)
-    # theta = RCx = atan((cube_y - robot_y) / (cube_x - robot_x))
-    # RCx' = robot_angle - RCx
+    # tan(RCx) = (obj_y - ref_y) / (obj_x - ref_x)
+    # theta = RCx = atan((obj_y - ref_y) / (obj_x - ref_x))
+    # RCx' = ref_angle - RCx
     #
     # ==>
     #
-    # related_x = cos(RCx') * sqrt((cube_y - robot_y)^2 + (cube_x - robot_x)^2)
-    # related_y = -sin(RCx') * sqrt((cube_y - robot_y)^2 + (cube_x - robot_x)^2)
-    cube_x = object_pose.position.x
-    cube_y = object_pose.position.y
-    cube_angle_z = object_pose.rotation.angle_z
+    # related_x = cos(RCx') * sqrt((obj_y - ref_y)^2 + (obj_x - ref_x)^2)
+    # related_y = -sin(RCx') * sqrt((obj_y - ref_y)^2 + (obj_x - ref_x)^2)
+    #
+    # This should return the save data as function get_relative_pose
+    obj_x = object_pose.position.x
+    obj_y = object_pose.position.y
+    obj_angle_z = object_pose.rotation.angle_z
 
-    robot_x = reference_frame_pose.position.x
-    robot_y = reference_frame_pose.position.y
-    robot_angle_z = reference_frame_pose.rotation.angle_z
+    ref_x = reference_frame_pose.position.x
+    ref_y = reference_frame_pose.position.y
+    ref_angle_z = reference_frame_pose.rotation.angle_z
 
-    if (cube_x != robot_x):
-        theta = math.atan((cube_y - robot_y) / (cube_x - robot_x))
+    if (obj_x != ref_x):
+        theta = math.atan((obj_y - ref_y) / (obj_x - ref_x))
     else:
-        if (cube_y > robot_y):
+        if (obj_y > ref_y):
             theta = math.pi / 2
-        elif (cube_y < robot_y):
+        elif (obj_y < ref_y):
             theta = -math.pi / 2
 
-    angle = robot_angle_z.radians - theta
-    newX = math.cos(angle) * math.sqrt((cube_y - robot_y) *
-                                       (cube_y - robot_y) + (cube_x - robot_x) * (cube_x - robot_x))
-    newY = -math.sin(angle) * math.sqrt((cube_y - robot_y) *
-                                        (cube_y - robot_y) + (cube_x - robot_x) * (cube_x - robot_x))
-    newAngle = cube_angle_z - robot_angle_z
+    angle = ref_angle_z.radians - theta
+    newX = math.cos(angle) * math.sqrt((obj_y - ref_y) *
+                                       (obj_y - ref_y) + (obj_x - ref_x) * (obj_x - ref_x))
+    newY = -math.sin(angle) * math.sqrt((obj_y - ref_y) *
+                                        (obj_y - ref_y) + (obj_x - ref_x) * (obj_x - ref_x))
+    newAngle = obj_angle_z - ref_angle_z
 
     return cozmo.util.pose_z_angle(newX, newY, 0, angle_z=newAngle, origin_id=object_pose._origin_id)
 

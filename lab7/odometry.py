@@ -173,20 +173,26 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             print(f'rest {rest}')
 
 
-def my_go_to_pose1(robot, x, y, angle_z):
+def my_go_to_pose1(robot, x, y, angle_z, debug = False):
     """Moves the robot to a pose relative to its current pose.
             Arguments:
             robot -- the Cozmo robot instance passed to the function
             x,y -- Desired position of the robot in millimeters
             angle_z -- Desired rotation of the robot around the vertical axis in degrees
     """
-    # ####
-    # TODO: Implement a function that makes the robot move to a desired pose
-    # using the my_drive_straight and my_turn_in_place functions. This should
-    # include a sequence of turning in place, moving straight, and then turning
-    # again at the target to get to the desired rotation (Approach 1).
-    # ####
-    pass
+    distance = math.sqrt(x * x + y * y)
+    angle = math.degrees(math.atan2(y, x))
+    if debug:
+        print(distance)
+        print(angle)
+
+    # Turn in place to point to new point
+    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
+    # Move
+    my_drive_straight(robot, distance, max(30, distance / 3), debug)
+    # Turn in place match angle_z
+    angle = angle_z - angle
+    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
 
 
 def my_go_to_pose2(robot, x, y, angle_z):
@@ -265,7 +271,8 @@ def run(robot: cozmo.robot.Robot):
             else:
                 print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
 
-    # my_go_to_pose1(robot, 100, 100, 45)
+    my_go_to_pose1(robot, -100, 0, -45)
+    my_go_to_pose1(robot, 100, -100, -90)
     # my_go_to_pose2(robot, 100, 100, 45)
 
     # cozmo_go_to_pose(robot, 100, 100, 45)

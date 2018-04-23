@@ -80,9 +80,9 @@ def rotate_front_wheel(robot, angle_deg):
             robot -- the Cozmo robot instance passed to the function
             angle_deg -- Desired rotation of the wheel in degrees
     """
-    # ####
-    # TODO: Implement this function.
-    # ####
+    radians = math.radians(angle_deg)
+    distance = radians * get_front_wheel_radius()
+    cozmo_drive_straight(robot, distance, 50)
 
 
 def my_drive_straight(robot, dist, speed):
@@ -164,6 +164,15 @@ def run(robot: cozmo.robot.Robot):
     print(f"***** Distance between wheels: {get_distance_between_wheels()}")
 
     # Example tests of the functions
+    for angle in range(15, 181, 15):
+        old_position = robot.pose.position.x
+        rotate_front_wheel(robot, angle)
+        new_position = robot.pose.position.x
+        distance = get_front_wheel_radius() * math.radians(angle)
+        if (new_position - old_position > distance - 2) and (new_position - old_position < distance + 2):
+            print(f'[rotate_front_wheel] Good in angle: {angle}')
+        else:
+            print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
 
     # cozmo_drive_straight(robot, 62, 50)
 

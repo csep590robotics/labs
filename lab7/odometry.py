@@ -116,19 +116,47 @@ def my_drive_straight(robot, dist, speed, debug = False):
             print(f'rest {rest}')
 
 
-
-def my_turn_in_place(robot, angle, speed):
+def my_turn_in_place(robot, angle, speed, debug = False):
     """Rotates the robot in place.
             Arguments:
             robot -- the Cozmo robot instance passed to the function
             angle -- Desired distance of the movement in degrees
             speed -- Desired speed of the movement in degrees per second
     """
-    # ####
-    # TODO: Implement your version of a rotating in place function using the
-    # robot.drive_wheels() function.
-    # ####
-    pass
+    if (angle < 0 and speed > 0) or (angle > 0 and speed < 0):
+        robot.say_text('Cannot do that').wait_for_completed()
+
+    # If speed is positive turn left, otherwise, turn right
+    old_angle = robot.pose.rotation.angle_z.degrees
+    if old_angle < 0:
+        old_angle += 360
+    new_angle = old_angle
+    DRIVE_WHEELS_WARM_UP_SECOND = 0.8
+    while angle - (new_angle - old_angle) > 0:
+        delta = new_angle - old_angle
+        if delta < 0:
+            delta += 360
+        rest = angle - delta
+        if debug:
+            print(f'rest {rest}')
+        if abs(rest) < 10 or rest < 0:
+            break
+        if rest < speed:
+            if debug:
+                print(f'lower speed')
+            speed = angle - (new_angle - old_angle)
+        speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
+        robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
+        time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
+        new_angle = robot.pose.rotation.angle_z.degrees
+        if new_angle < 0:
+            new_angle += 360
+        if debug:
+            delta = new_angle - old_angle
+            if delta < 0:
+                delta += 360
+            rest = angle - delta
+            print(f'rest {rest}')
 
 
 def my_go_to_pose1(robot, x, y, angle_z):
@@ -204,6 +232,24 @@ def run(robot: cozmo.robot.Robot):
                 print(f'[my_drive_straight] Wrong in distance: {distance}, speed: {speed}, delta {new_position - old_position - distance}')
 
     # cozmo_turn_in_place(robot, 60, 30)
+    for angle in range(30, 181, 30):
+        for speed in range(30, 61, 30):
+            old_angle = robot.pose.rotation.angle_z.degrees
+            if old_angle < 0:
+                old_angle += 360
+            print(f'start at {old_angle}')
+            my_turn_in_place(robot, angle, speed)
+            new_angle = robot.pose.rotation.angle_z.degrees
+            if new_angle < 0:
+                new_angle += 360
+            print(f'end at {new_angle}')
+            delta = new_angle - old_angle
+            if delta < 0:
+                delta += 360
+            if (delta > angle - 10) and (delta < angle + 10):
+                print(f'[my_turn_in_place] Good in angle: {angle}, speed: {speed}')
+            else:
+                print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
 
     # my_go_to_pose1(robot, 100, 100, 45)
     # my_go_to_pose2(robot, 100, 100, 45)

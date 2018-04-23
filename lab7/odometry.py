@@ -69,7 +69,7 @@ def get_distance_between_wheels():
     # The distance was determined by helper/get_distance_between_wheel.py.
     # Results is in helper/results/get_distance_between_wheel.txt
     #   The test test with different speed and it's mutiplicatoin
-    #   Also for each speed, test with multiple time with the differnt of duratoin
+    #   Also for each speed, test with multiple time with the differnt of duration
     #   The total average is 88.03572726050415
     return 88
 
@@ -107,17 +107,21 @@ def my_drive_straight(robot, dist, speed, debug = False):
             print(f'old_position {old_position}')
             print(f'new_position {new_position}')
             print(f'rest {rest}')
-        if abs(rest) < 10:
+        if abs(rest) < 5:
             break
         if rest < speed:
+            speed = speed / abs(speed) * rest
             if debug:
-                print(f'lower speed')
-            speed = dist - (new_position - old_position)
+                print(f'lower speed to {speed}')
+        elif rest - speed < 30:     # Cannot move when distance is small
+            speed = speed / abs(speed) * rest + 10
+            if debug:
+                print(f'higher speed to {speed}')
         robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
         new_position = robot.pose.position.x
         if debug:
-            rest = dist - (new_position - old_position)
+            rest = dist - abs(new_position - old_position)
             print(f'rest {rest}')
 
 
@@ -150,12 +154,15 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         rest = angle - delta
         if debug:
             print(f'rest {rest}')
-        if abs(rest) < 10 or rest < 0:
+        if abs(rest) < 5 or rest < 0:
             break
         if rest < speed:
+            speed = rest
             if debug:
-                print(f'lower speed')
-            speed = angle - (new_angle - old_angle)
+                print(f'lower speed to {speed}')
+        elif rest - speed < 20: # Cannot turn when degree is small
+            speed = rest
+            print(f'higher speed to {speed}')
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
@@ -190,7 +197,7 @@ def my_go_to_pose1(robot, x, y, angle_z, debug = False):
     my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
     # Move
     my_drive_straight(robot, distance, max(30, distance / 3), debug)
-    # Turn in place match angle_z
+    # Turn in place to match angle_z
     angle = angle_z - angle
     my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
 
@@ -271,9 +278,11 @@ def run(robot: cozmo.robot.Robot):
             else:
                 print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
 
-    my_go_to_pose1(robot, -100, 0, -45)
-    my_go_to_pose1(robot, 100, -100, -90)
-    # my_go_to_pose2(robot, 100, 100, 45)
+    my_go_to_pose1(robot, 100, 0, 45, True)
+    my_go_to_pose1(robot, -100, 0, -45, True)
+    my_go_to_pose1(robot, 100, -100, -90, True)
+
+    # my_go_to_pose2(robot, 100, 100, 45, True)
 
     # cozmo_go_to_pose(robot, 100, 100, 45)
     # my_go_to_pose3(robot, 100, 100, 45)

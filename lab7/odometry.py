@@ -85,18 +85,36 @@ def rotate_front_wheel(robot, angle_deg):
     cozmo_drive_straight(robot, distance, 50)
 
 
-def my_drive_straight(robot, dist, speed):
+def my_drive_straight(robot, dist, speed, debug = False):
     """Drives the robot straight.
             Arguments:
             robot -- the Cozmo robot instance passed to the function
             dist -- Desired distance of the movement in millimeters
             speed -- Desired speed of the movement in millimeters per second
     """
-    # ####
-    # TODO: Implement your version of a driving straight function using the
-    # robot.drive_wheels() function.
-    # ####
-    pass
+    if (dist < 0 and speed > 0) or (dist > 0 and speed < 0):
+        robot.say_text('Cannot do that').wait_for_completed()
+
+    old_position = robot.pose.position.x
+    new_position = old_position
+    DRIVE_WHEELS_WARM_UP_SECOND = 0.2
+    while dist - (new_position - old_position) > 0:
+        rest = dist - (new_position - old_position)
+        if debug:
+            print(f'rest {rest}')
+        if abs(rest) < 10:
+            break
+        if rest < speed:
+            if debug:
+                print(f'lower speed')
+            speed = dist - (new_position - old_position)
+        robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
+        time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
+        new_position = robot.pose.position.x
+        if debug:
+            rest = dist - (new_position - old_position)
+            print(f'rest {rest}')
+
 
 
 def my_turn_in_place(robot, angle, speed):
@@ -175,6 +193,15 @@ def run(robot: cozmo.robot.Robot):
             print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
 
     # cozmo_drive_straight(robot, 62, 50)
+    for distance in range(50, 100, 7):
+        for speed in range(20, 50, 7):
+            old_position = robot.pose.position.x
+            my_drive_straight(robot, distance, speed)
+            new_position = robot.pose.position.x
+            if (new_position - old_position > distance - 10) and (new_position - old_position < distance + 10):
+                print(f'[my_drive_straight] Good in distance: {distance}, speed: {speed}')
+            else:
+                print(f'[my_drive_straight] Wrong in distance: {distance}, speed: {speed}, delta {new_position - old_position - distance}')
 
     # cozmo_turn_in_place(robot, 60, 30)
 

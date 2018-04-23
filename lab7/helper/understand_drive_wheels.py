@@ -54,7 +54,7 @@ async def get_drive_wheels_warm_up_by_length(robot: cozmo.robot.Robot):
         old_position = robot.pose.position.x
         await robot.drive_wheels(speed, speed, duration=(duration / 10) + (distance / speed))
         new_position = robot.pose.position.x
-        if (new_position - old_position > distance - 1) and (new_position - old_position < distance + 1):
+        if (new_position - old_position > distance - 3) and (new_position - old_position < distance + 3):
             print(f'Moved enought distance, duration: {duration / 10}')
             return duration / 10
         else:

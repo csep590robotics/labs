@@ -50,20 +50,18 @@ def cozmo_go_to_pose(robot, x, y, angle_z):
 
 def get_front_wheel_radius():
     """Returns the radius of the Cozmo robot's front wheel in millimeters."""
-    # ####
-    # TODO: Empirically determine the radius of the robot's front wheel using the
-    # cozmo_drive_straight() function. You can write a separate script for doing
-    # experiments to determine the radius. This function should return the radius
-    # in millimeters. Write a comment that explains how you determined it and any
-    # computation you do as part of this function.
-    # ####
-    pass
+    # By watching the Cozmo to move straight and adjust the parameter,
+    # found the length of circle is 86
+    # The length was determined by helper/get_front_wheel_radium.py.
+    # Results is in helper/results/get_front_wheel_radium.txt
+    #   Radius is 13.687325105903
+    return 13.69
 
 
 def get_distance_between_wheels():
     """Returns the distance between the wheels of the Cozmo robot in millimeters."""
 
-    # The radius was determined by helper/get_distance_between_wheel.py.
+    # The distance was determined by helper/get_distance_between_wheel.py.
     # Results is in helper/results/get_distance_between_wheel.txt
     #   The test test with different speed and it's mutiplicatoin
     #   Also for each speed, test with multiple time with the differnt of duratoin

@@ -27,7 +27,7 @@ class AngleAnnotator(cozmo.annotate.Annotator):
 async def run(robot: cozmo.robot.Robot):
     '''The run method runs once the Cozmo SDK is connected.'''
 
-    # add annotators for battery level and ball bounding box
+    # add annotators for angle
     robot.world.image_annotator.add_annotator('angle', AngleAnnotator)
 
     print(robot.pose.rotation.angle_z)

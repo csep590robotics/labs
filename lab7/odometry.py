@@ -92,15 +92,20 @@ def my_drive_straight(robot, dist, speed, debug = False):
             dist -- Desired distance of the movement in millimeters
             speed -- Desired speed of the movement in millimeters per second
     """
-    if (dist < 0 and speed > 0) or (dist > 0 and speed < 0):
+    if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
+    if dist < 0 and speed > 0:
+        speed = -speed
+        dist = abs(dist)
 
     old_position = robot.pose.position.x
     new_position = old_position
     DRIVE_WHEELS_WARM_UP_SECOND = 0.2
     while dist - (new_position - old_position) > 0:
-        rest = dist - (new_position - old_position)
+        rest = dist - abs(old_position - new_position)
         if debug:
+            print(f'old_position {old_position}')
+            print(f'new_position {new_position}')
             print(f'rest {rest}')
         if abs(rest) < 10:
             break
@@ -123,8 +128,11 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             angle -- Desired distance of the movement in degrees
             speed -- Desired speed of the movement in degrees per second
     """
-    if (angle < 0 and speed > 0) or (angle > 0 and speed < 0):
+    if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
+    if angle < 0 and speed > 0:
+        speed = -speed
+        angle = abs(angle)
 
     # If speed is positive turn left, otherwise, turn right
     old_angle = robot.pose.rotation.angle_z.degrees
@@ -133,7 +141,10 @@ def my_turn_in_place(robot, angle, speed, debug = False):
     new_angle = old_angle
     DRIVE_WHEELS_WARM_UP_SECOND = 0.8
     while angle - (new_angle - old_angle) > 0:
-        delta = new_angle - old_angle
+        if speed > 0:
+            delta = new_angle - old_angle
+        else:
+            delta = old_angle - new_angle
         if delta < 0:
             delta += 360
         rest = angle - delta
@@ -152,7 +163,10 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if new_angle < 0:
             new_angle += 360
         if debug:
-            delta = new_angle - old_angle
+            if speed > 0:
+                delta = new_angle - old_angle
+            else:
+                delta = old_angle - new_angle
             if delta < 0:
                 delta += 360
             rest = angle - delta

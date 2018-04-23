@@ -12,6 +12,11 @@ import time
 
 # Wrappers for existing Cozmo navigation functions
 
+# Experiment warm up second for Cozmo Drive Wheels function,
+# found by was determined by helper/understand_drive_wheels.py
+# results is in helper/results/understand_drive_wheels.txt should be 0.8
+# But for the length test, this should be 0.6
+DRIVE_WHEELS_WARM_UP_SECOND = 0.6
 
 def cozmo_drive_straight(robot, dist, speed):
     """Drives the robot straight.

@@ -202,19 +202,51 @@ def my_go_to_pose1(robot, x, y, angle_z, debug = False):
     my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
 
 
-def my_go_to_pose2(robot, x, y, angle_z):
+def my_go_to_pose2(robot, x, y, angle_z, debug = False):
     """Moves the robot to a pose relative to its current pose.
             Arguments:
             robot -- the Cozmo robot instance passed to the function
             x,y -- Desired position of the robot in millimeters
             angle_z -- Desired rotation of the robot around the vertical axis in degrees
     """
-    # ####
-    # TODO: Implement a function that makes the robot move to a desired pose
-    # using the robot.drive_wheels() function to jointly move and rotate the
-    # robot to reduce distance between current and desired pose (Approach 2).
-    # ####
-    pass
+    if y == 0:
+        my_go_to_pose1(robot, x, y, angle_z, debug)
+        return
+
+    distance = math.sqrt(x * x + y * y)
+    angle = math.atan2(abs(y), abs(x))
+    if debug:
+        print(f"distance: {distance}")
+        print(f"angle: {angle}")
+    # Circle Radius
+    # theta = angle * 2
+    # (distance / 2) : r = sin(theta / 2)
+    # r = (distance / 2) / sin(theta / 2)
+    r = (distance / 2) / math.sin(angle)
+    # while turn left (y > 0):
+    #   Arc length left = (r - b / 2) * (theta)
+    #   Arc length right = (r + b / 2) * (theta)
+    if y > 0:
+        length_l = (r - get_distance_between_wheels() / 2) * (angle * 2)
+        length_r = (r + get_distance_between_wheels() / 2) * (angle * 2)
+        speed_l = max(30, length_l / 3)
+        duration = length_l / speed_l
+        speed_r = length_r / duration
+    else:
+        length_l = (r + get_distance_between_wheels() / 2) * (angle * 2)
+        length_r = (r - get_distance_between_wheels() / 2) * (angle * 2)
+        speed_r = max(30, length_r / 3)
+        duration = length_r / speed_r
+        speed_l = length_l / duration
+    if debug:
+        print(f"speed_l: {speed_l}")
+        print(f"speed_r: {speed_r}")
+    # Move
+    robot.drive_wheels(speed_l, speed_r, duration = duration + DRIVE_WHEELS_WARM_UP_SECOND)
+    time.sleep(duration + DRIVE_WHEELS_WARM_UP_SECOND)
+    # Turn in place to match angle_z
+    angle = angle_z - angle * 2
+    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
 
 
 def my_go_to_pose3(robot, x, y, angle_z):
@@ -282,7 +314,11 @@ def run(robot: cozmo.robot.Robot):
     my_go_to_pose1(robot, -100, 0, -45, True)
     my_go_to_pose1(robot, 100, -100, -90, True)
 
-    # my_go_to_pose2(robot, 100, 100, 45, True)
+    my_go_to_pose2(robot, 100, 0, 45, True)
+    my_go_to_pose2(robot, 100, 100, 45, True)
+    my_go_to_pose2(robot, 100, -100, 45, True)
+    my_go_to_pose2(robot, -100, -100, 45, True)
+    my_go_to_pose2(robot, 0, -150, 45, True)
 
     # cozmo_go_to_pose(robot, 100, 100, 45)
     # my_go_to_pose3(robot, 100, 100, 45)

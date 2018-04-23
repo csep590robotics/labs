@@ -160,26 +160,21 @@ def my_go_to_pose3(robot, x, y, angle_z):
 
 
 def run(robot: cozmo.robot.Robot):
-
-    print("***** Front wheel radius: " + str(get_front_wheel_radius()))
-    print("***** Distance between wheels: " +
-          str(get_distance_between_wheels()))
+    print(f"***** Front wheel radius     : {get_front_wheel_radius()}")
+    print(f"***** Distance between wheels: {get_distance_between_wheels()}")
 
     # Example tests of the functions
 
-    cozmo_drive_straight(robot, 62, 50)
-    cozmo_turn_in_place(robot, 60, 30)
-    cozmo_go_to_pose(robot, 100, 100, 45)
+    # cozmo_drive_straight(robot, 62, 50)
 
-    rotate_front_wheel(robot, 90)
-    my_drive_straight(robot, 62, 50)
-    my_turn_in_place(robot, 90, 30)
+    # cozmo_turn_in_place(robot, 60, 30)
 
-    my_go_to_pose1(robot, 100, 100, 45)
-    my_go_to_pose2(robot, 100, 100, 45)
-    my_go_to_pose3(robot, 100, 100, 45)
+    # my_go_to_pose1(robot, 100, 100, 45)
+    # my_go_to_pose2(robot, 100, 100, 45)
+
+    # cozmo_go_to_pose(robot, 100, 100, 45)
+    # my_go_to_pose3(robot, 100, 100, 45)
 
 
 if __name__ == '__main__':
-
     cozmo.run_program(run)

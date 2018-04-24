@@ -138,7 +138,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
     if speed <= 0:
         robot.say_text('Cannot do that').wait_for_completed()
     if angle == 0:
-        robot.say_text('No Move').wait_for_completed()
+        return
 
     while angle > 360:  # Reduce the turning angle
         angle -= 360

@@ -261,7 +261,7 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
     my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 30), debug)
 
 
-def my_go_to_pose3(robot, x, y, angle_z):
+def my_go_to_pose3(robot, x, y, angle_z, debug = False):
     """Moves the robot to a pose relative to its current pose.
             Arguments:
             robot -- the Cozmo robot instance passed to the function
@@ -269,11 +269,26 @@ def my_go_to_pose3(robot, x, y, angle_z):
             angle_z -- Desired rotation of the robot around the vertical axis in degrees
     """
     # ####
-    # TODO: Implement a function that makes the robot move to a desired pose
-    # as fast as possible. You can experiment with the built-in Cozmo function
-    # (cozmo_go_to_pose() above) to understand its strategy and do the same.
+    # Find out when the angle is larger than 90 degree,
+    # cozmo_go_to_pose() function will turn first
     # ####
-    pass
+    if y == 0:
+        my_go_to_pose1(robot, x, y, angle_z, debug)
+        return
+
+    distance = math.sqrt(x * x + y * y)
+    angle = get_number_signal(y) * math.degrees(math.atan2(abs(y), x))
+    debug_print(f"angle {angle}", debug)
+    if abs(angle) > 90:
+        turn_angle = angle - get_number_signal(angle) * 90
+        debug_print(f"Turn {turn_angle} first to have less movement", debug)
+        my_turn_in_place(robot, turn_angle, max(abs(turn_angle / 2), 30), debug)
+        x = 0
+        y = get_number_signal(y) * distance
+        angle_z = angle_z - turn_angle
+        debug_print(f"After turn adjust x: {x}, y: {y}, angle: {angle_z}", debug)
+
+    my_go_to_pose2(robot, x, y, angle_z, debug)
 
 
 def get_number_signal(number: float):
@@ -341,8 +356,17 @@ def run(robot: cozmo.robot.Robot):
     my_go_to_pose2(robot, -100, -100, 45, True)
     my_go_to_pose2(robot, 0, -150, 45, True)
 
-    # cozmo_go_to_pose(robot, 100, 100, 45)
-    # my_go_to_pose3(robot, 100, 100, 45)
+    cozmo_go_to_pose(robot, 100, 0, 45)
+    cozmo_go_to_pose(robot, 100, 100, 45)
+    cozmo_go_to_pose(robot, 100, -100, 45)
+    cozmo_go_to_pose(robot, -100, -100, 45)
+    cozmo_go_to_pose(robot, 0, -150, 45)
+
+    my_go_to_pose3(robot, 100, 0, 45, True)
+    my_go_to_pose3(robot, 100, 100, 45, True)
+    my_go_to_pose3(robot, 100, -100, 45, True)
+    my_go_to_pose3(robot, -100, -100, 45, True)
+    my_go_to_pose3(robot, 0, -150, 45, True)
 
 
 if __name__ == '__main__':

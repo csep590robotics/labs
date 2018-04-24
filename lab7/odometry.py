@@ -130,8 +130,11 @@ def my_turn_in_place(robot, angle, speed, debug = False):
     """
     debug_print(f"Angle to {angle}, speed to {speed}", debug)
 
-    if speed < 0:
+    if speed <= 0:
         robot.say_text('Cannot do that').wait_for_completed()
+    if angle == 0:
+        robot.say_text('No Move').wait_for_completed()
+
     while angle > 360:  # Reduce the turning angle
         angle -= 360
     while angle < -360: # Reduce the turning angle
@@ -167,8 +170,8 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if rest < abs(speed):
             speed = get_number_signal(speed) * rest
             debug_print(f'lower speed to {speed}', debug)
-        elif rest - speed < 20: # Cannot turn when degree is small
-            speed = rest
+        elif rest - abs(speed) < 20: # Cannot turn when degree is small
+            speed = get_number_signal(speed) * rest
             debug_print(f'higher speed to {speed}', debug)
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)

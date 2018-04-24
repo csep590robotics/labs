@@ -92,6 +92,7 @@ def my_drive_straight(robot, dist, speed, debug = False):
             dist -- Desired distance of the movement in millimeters
             speed -- Desired speed of the movement in millimeters per second
     """
+    debug_print(f"Dist to {dist}, speed to {speed}", debug)
     if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
     if dist < 0 and speed > 0:
@@ -103,22 +104,23 @@ def my_drive_straight(robot, dist, speed, debug = False):
     DRIVE_WHEELS_WARM_UP_SECOND = 0.2
     while dist - (new_position - old_position) > 0:
         rest = dist - abs(old_position - new_position)
-        debug_print(f'old_position {old_position}', debug)
-        debug_print(f'new_position {new_position}', debug)
-        debug_print(f'rest {rest}', debug)
+        debug_print(f"old_position {old_position}", debug)
+        debug_print(f"new_position {new_position}", debug)
+        debug_print(f"rest {rest}", debug)
         if abs(rest) < 5:
             break
-        if rest < speed:
+        if rest < abs(speed):
             speed = get_number_signal(speed) * rest
-            debug_print(f'lower speed to {speed}', debug)
-        elif rest - speed < 30:     # Cannot move when distance is small
-            speed = get_number_signal(speed) * rest + 10
-            debug_print(f'higher speed to {speed}', debug)
+            debug_print(f"lower speed to {speed}", debug)
+        elif rest - abs(speed) < 30:     # Cannot move when distance is small
+            speed = get_number_signal(speed) * rest
+            debug_print(f"higher speed to {speed}", debug)
         robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
         new_position = robot.pose.position.x
-        debug_print= dist - abs(new_position - old_position, debug)
-        debug_print(f'rest {rest}', debug)
+        if debug:
+            rest = dist - abs(new_position - old_position)
+            debug_print(f"rest {rest}", debug)
 
 
 def my_turn_in_place(robot, angle, speed, debug = False):
@@ -316,8 +318,8 @@ def run(robot: cozmo.robot.Robot):
             print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
 
     # cozmo_drive_straight(robot, 62, 50)
-    for distance in range(50, 100, 7):
-        for speed in range(20, 50, 7):
+    for distance in range(50, 100, 15):
+        for speed in range(20, 50, 10):
             old_position = robot.pose.position.x
             my_drive_straight(robot, distance, speed)
             new_position = robot.pose.position.x

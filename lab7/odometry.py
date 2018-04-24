@@ -103,26 +103,22 @@ def my_drive_straight(robot, dist, speed, debug = False):
     DRIVE_WHEELS_WARM_UP_SECOND = 0.2
     while dist - (new_position - old_position) > 0:
         rest = dist - abs(old_position - new_position)
-        if debug:
-            print(f'old_position {old_position}')
-            print(f'new_position {new_position}')
-            print(f'rest {rest}')
+        debug_print(f'old_position {old_position}', debug)
+        debug_print(f'new_position {new_position}', debug)
+        debug_print(f'rest {rest}', debug)
         if abs(rest) < 5:
             break
         if rest < speed:
             speed = get_number_signal(speed) * rest
-            if debug:
-                print(f'lower speed to {speed}')
+            debug_print(f'lower speed to {speed}', debug)
         elif rest - speed < 30:     # Cannot move when distance is small
             speed = get_number_signal(speed) * rest + 10
-            if debug:
-                print(f'higher speed to {speed}')
+            debug_print(f'higher speed to {speed}', debug)
         robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
         new_position = robot.pose.position.x
-        if debug:
-            rest = dist - abs(new_position - old_position)
-            print(f'rest {rest}')
+        debug_print= dist - abs(new_position - old_position, debug)
+        debug_print(f'rest {rest}', debug)
 
 
 def my_turn_in_place(robot, angle, speed, debug = False):
@@ -132,8 +128,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             angle -- Desired distance of the movement in degrees
             speed -- Desired speed of the movement in degrees per second
     """
-    if debug:
-        print(f"Angle to {angle}, speed to {speed}")
+    debug_print(f"Angle to {angle}, speed to {speed}", debug)
 
     if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
@@ -150,8 +145,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
     if angle < 0 and speed > 0:
         speed = -speed
         angle = abs(angle)
-    if debug:
-        print(f"Adjust angle to {angle}, speed to {speed}")
+    debug_print(f"Adjust angle to {angle}, speed to {speed}", debug)
 
     # If speed is positive turn left, otherwise, turn right
     old_angle = robot.pose.rotation.angle_z.degrees
@@ -167,17 +161,15 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if delta < 0:
             delta += 360
         rest = angle - delta
-        if debug:
-            print(f'rest {rest}')
+        debug_print(f'rest {rest}', debug)
         if abs(rest) < 5 or rest < 0:
             break
         if rest < abs(speed):
             speed = get_number_signal(speed) * rest
-            if debug:
-                print(f'lower speed to {speed}')
+            debug_print(f'lower speed to {speed}', debug)
         elif rest - speed < 20: # Cannot turn when degree is small
             speed = rest
-            print(f'higher speed to {speed}')
+            debug_print(f'higher speed to {speed}', debug)
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND + 1)
@@ -192,7 +184,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             if delta < 0:
                 delta += 360
             rest = angle - delta
-            print(f'rest {rest}')
+            debug_print(f'rest {rest}', debug)
 
 
 def my_go_to_pose1(robot, x, y, angle_z, debug = False):
@@ -204,9 +196,8 @@ def my_go_to_pose1(robot, x, y, angle_z, debug = False):
     """
     distance = math.sqrt(x * x + y * y)
     angle = math.degrees(math.atan2(y, x))
-    if debug:
-        print(distance)
-        print(angle)
+    debug_print(distance, debug)
+    debug_print(angle, debug)
 
     # Turn in place to point to new point
     my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
@@ -230,9 +221,8 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
 
     distance = math.sqrt(x * x + y * y)
     angle = math.atan2(abs(y), x)
-    if debug:
-        print(f"distance: {distance}")
-        print(f"angle: {math.degrees(angle)}")
+    debug_print(f"distance: {distance}", debug)
+    debug_print(f"angle: {math.degrees(angle)}", debug)
     # Circle Radius
     # theta = angle * 2
     # (distance / 2) : r = sin(theta / 2)
@@ -253,21 +243,18 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         speed_r = max(30, length_r / 3)
         duration = length_r / speed_r
         speed_l = length_l / duration
-    if debug:
-        print(f"r: {r}")
-        print(f"duration: {duration}")
-        print(f"speed_l: {speed_l}")
-        print(f"speed_r: {speed_r}")
+    debug_print(f"r: {r}", debug)
+    debug_print(f"duration: {duration}", debug)
+    debug_print(f"speed_l: {speed_l}", debug)
+    debug_print(f"speed_r: {speed_r}", debug)
     # Move
     robot.drive_wheels(speed_l, speed_r, duration = duration + DRIVE_WHEELS_WARM_UP_SECOND)
     time.sleep(duration + DRIVE_WHEELS_WARM_UP_SECOND)
     # Turn in place to match angle_z
-    if debug:
-        print(f"angle_z: {angle_z}")
-        print(f"angle: {math.degrees(angle)}")
+    debug_print(f"angle_z: {angle_z}", debug)
+    debug_print(f"angle: {math.degrees(angle)}", debug)
     angle_z = angle_z - get_number_signal(y) * math.degrees(angle * 2)
-    if debug:
-        print(f"new_angle_z: {angle_z}")
+    debug_print(f"new_angle_z: {angle_z}", debug)
     my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 30), debug)
 
 
@@ -288,6 +275,11 @@ def my_go_to_pose3(robot, x, y, angle_z):
 
 def get_number_signal(number: float):
     return number / abs(number)
+
+
+def debug_print(message: str, debug = False):
+    if debug:
+        print(message)
 
 
 def run(robot: cozmo.robot.Robot):

@@ -112,6 +112,9 @@ def my_drive_straight(robot, dist, speed, debug = False):
         if rest < abs(speed):
             speed = get_number_signal(speed) * rest
             debug_print(f"lower speed to {speed}", debug)
+        elif rest - abs(speed) < 10:     # Cannot move when distance is small
+            speed = get_number_signal(speed) * rest + 10
+            debug_print(f"higher speed to {speed}", debug)
         elif rest - abs(speed) < 30:     # Cannot move when distance is small
             speed = get_number_signal(speed) * rest
             debug_print(f"higher speed to {speed}", debug)

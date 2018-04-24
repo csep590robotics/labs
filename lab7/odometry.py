@@ -317,7 +317,7 @@ def run(robot: cozmo.robot.Robot):
         else:
             print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
 
-    # cozmo_drive_straight(robot, 62, 50)
+    cozmo_drive_straight(robot, 62, 50)
     for distance in range(50, 100, 15):
         for speed in range(20, 50, 10):
             old_position = robot.pose.position.x
@@ -328,18 +328,16 @@ def run(robot: cozmo.robot.Robot):
             else:
                 print(f'[my_drive_straight] Wrong in distance: {distance}, speed: {speed}, delta {new_position - old_position - distance}')
 
-    # cozmo_turn_in_place(robot, 60, 30)
+    cozmo_turn_in_place(robot, 60, 30)
     for angle in range(30, 181, 30):
-        for speed in range(30, 61, 30):
+        for speed in range(30, 61, 15):
             old_angle = robot.pose.rotation.angle_z.degrees
             if old_angle < 0:
                 old_angle += 360
-            print(f'start at {old_angle}')
             my_turn_in_place(robot, angle, speed)
             new_angle = robot.pose.rotation.angle_z.degrees
             if new_angle < 0:
                 new_angle += 360
-            print(f'end at {new_angle}')
             delta = new_angle - old_angle
             if delta < 0:
                 delta += 360

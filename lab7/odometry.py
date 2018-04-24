@@ -132,11 +132,26 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             angle -- Desired distance of the movement in degrees
             speed -- Desired speed of the movement in degrees per second
     """
+    if debug:
+        print(f"Angle to {angle}, speed to {speed}")
+
     if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
+    while angle > 360:  # Reduce the turning angle
+        angle -= 360
+    while angle < -360: # Reduce the turning angle
+        angle += 360
+    if angle > 180:     # Reduce the turning angle
+        angle = 360 - angle
+        speed = -speed
+    if angle < -180:    # Reduce the turning angle
+        angle = 360 + angle
+        speed = -speed
     if angle < 0 and speed > 0:
         speed = -speed
         angle = abs(angle)
+    if debug:
+        print(f"Adjust angle to {angle}, speed to {speed}")
 
     # If speed is positive turn left, otherwise, turn right
     old_angle = robot.pose.rotation.angle_z.degrees
@@ -156,8 +171,8 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             print(f'rest {rest}')
         if abs(rest) < 5 or rest < 0:
             break
-        if rest < speed:
-            speed = rest
+        if rest < abs(speed):
+            speed = speed / abs(speed) * rest
             if debug:
                 print(f'lower speed to {speed}')
         elif rest - speed < 20: # Cannot turn when degree is small

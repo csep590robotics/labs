@@ -110,11 +110,11 @@ def my_drive_straight(robot, dist, speed, debug = False):
         if abs(rest) < 5:
             break
         if rest < speed:
-            speed = speed / abs(speed) * rest
+            speed = get_number_signal(speed) * rest
             if debug:
                 print(f'lower speed to {speed}')
         elif rest - speed < 30:     # Cannot move when distance is small
-            speed = speed / abs(speed) * rest + 10
+            speed = get_number_signal(speed) * rest + 10
             if debug:
                 print(f'higher speed to {speed}')
         robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + 1)
@@ -172,7 +172,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if abs(rest) < 5 or rest < 0:
             break
         if rest < abs(speed):
-            speed = speed / abs(speed) * rest
+            speed = get_number_signal(speed) * rest
             if debug:
                 print(f'lower speed to {speed}')
         elif rest - speed < 20: # Cannot turn when degree is small
@@ -265,7 +265,7 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
     if debug:
         print(f"angle_z: {angle_z}")
         print(f"angle: {math.degrees(angle)}")
-    angle_z = angle_z - (y / abs(y)) * math.degrees(angle * 2)
+    angle_z = angle_z - get_number_signal(y) * math.degrees(angle * 2)
     if debug:
         print(f"new_angle_z: {angle_z}")
     my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 30), debug)
@@ -284,6 +284,10 @@ def my_go_to_pose3(robot, x, y, angle_z):
     # (cozmo_go_to_pose() above) to understand its strategy and do the same.
     # ####
     pass
+
+
+def get_number_signal(number: float):
+    return number / abs(number)
 
 
 def run(robot: cozmo.robot.Robot):

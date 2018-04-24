@@ -229,10 +229,10 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         return
 
     distance = math.sqrt(x * x + y * y)
-    angle = math.atan2(abs(y), abs(x))
+    angle = math.atan2(abs(y), x)
     if debug:
         print(f"distance: {distance}")
-        print(f"angle: {angle}")
+        print(f"angle: {math.degrees(angle)}")
     # Circle Radius
     # theta = angle * 2
     # (distance / 2) : r = sin(theta / 2)
@@ -254,14 +254,21 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         duration = length_r / speed_r
         speed_l = length_l / duration
     if debug:
+        print(f"r: {r}")
+        print(f"duration: {duration}")
         print(f"speed_l: {speed_l}")
         print(f"speed_r: {speed_r}")
     # Move
     robot.drive_wheels(speed_l, speed_r, duration = duration + DRIVE_WHEELS_WARM_UP_SECOND)
     time.sleep(duration + DRIVE_WHEELS_WARM_UP_SECOND)
     # Turn in place to match angle_z
-    angle = angle_z - angle * 2
-    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
+    if debug:
+        print(f"angle_z: {angle_z}")
+        print(f"angle: {math.degrees(angle)}")
+    angle_z = angle_z - (y / abs(y)) * math.degrees(angle * 2)
+    if debug:
+        print(f"new_angle_z: {angle_z}")
+    my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 30), debug)
 
 
 def my_go_to_pose3(robot, x, y, angle_z):

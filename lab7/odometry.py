@@ -92,7 +92,7 @@ def my_drive_straight(robot, dist, speed, debug = False):
             dist -- Desired distance of the movement in millimeters
             speed -- Desired speed of the movement in millimeters per second
     """
-    debug_print(f"Dist to {dist}, speed to {speed}", debug)
+    debug_print(f"[Drive Straight] Dist to {dist}, speed to {speed}", debug)
     if speed < 0:
         robot.say_text('Cannot do that').wait_for_completed()
         return
@@ -104,26 +104,26 @@ def my_drive_straight(robot, dist, speed, debug = False):
     new_position = old_position
     while dist - (new_position - old_position) > 0:
         rest = dist - abs(old_position - new_position)
-        debug_print(f"old_position {old_position}", debug)
-        debug_print(f"new_position {new_position}", debug)
-        debug_print(f"rest {rest}", debug)
+        debug_print(f"[Drive Straight] old_position {old_position}", debug)
+        debug_print(f"[Drive Straight] new_position {new_position}", debug)
+        debug_print(f"[Drive Straight] rest {rest}", debug)
         if abs(rest) < 5:
             break
         if rest < abs(speed):
             speed = get_number_signal(speed) * rest
-            debug_print(f"lower speed to {speed}", debug)
+            debug_print(f"[Drive Straight] lower speed to {speed}", debug)
         elif rest - abs(speed) < 10:     # Cannot move when distance is small
             speed = get_number_signal(speed) * rest + 10
-            debug_print(f"higher speed to {speed}", debug)
+            debug_print(f"[Drive Straight] higher speed to {speed}", debug)
         elif rest - abs(speed) < 30:     # Cannot move when distance is small
             speed = get_number_signal(speed) * rest
-            debug_print(f"higher speed to {speed}", debug)
+            debug_print(f"[Drive Straight] higher speed to {speed}", debug)
         robot.drive_wheels(speed, speed, 0, 0, duration=max(rest / abs(speed), 1))
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND)
         new_position = robot.pose.position.x
         if debug:
             rest = dist - abs(new_position - old_position)
-            debug_print(f"rest {rest}", debug)
+            debug_print(f"[Drive Straight] rest {rest}", debug)
 
 
 def my_turn_in_place(robot, angle, speed, debug = False):
@@ -133,7 +133,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             angle -- Desired distance of the movement in degrees
             speed -- Desired speed of the movement in degrees per second
     """
-    debug_print(f"Angle to {angle}, speed to {speed}", debug)
+    debug_print(f"[Turn in Place] Angle to {angle}, speed to {speed}", debug)
 
     if speed <= 0:
         robot.say_text('Cannot do that').wait_for_completed()
@@ -153,7 +153,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
     if angle < 0 and speed > 0:
         speed = -speed
         angle = abs(angle)
-    debug_print(f"Adjust angle to {angle}, speed to {speed}", debug)
+    debug_print(f"[Turn in Place] Adjust angle to {angle}, speed to {speed}", debug)
 
     # If speed is positive turn left, otherwise, turn right
     old_angle = robot.pose.rotation.angle_z.degrees
@@ -168,15 +168,15 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if delta < 0:
             delta += 360
         rest = angle - delta
-        debug_print(f'rest {rest}', debug)
+        debug_print(f'[Turn in Place] rest {rest}', debug)
         if abs(rest) < 5 or rest < 0:
             break
         if rest < abs(speed) - 1:
             speed = get_number_signal(speed) * rest
-            debug_print(f'lower speed to {speed}', debug)
+            debug_print(f'[Turn in Place] lower speed to {speed}', debug)
         if rest - abs(speed) < 20: # Cannot turn when degree is small
             speed = get_number_signal(speed) * rest + 15
-            debug_print(f'higher speed to {speed}', debug)
+            debug_print(f'[Turn in Place] higher speed to {speed}', debug)
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + max(rest / abs(speed), 1))
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND)
@@ -191,7 +191,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             if delta < 0:
                 delta += 360
             rest = angle - delta
-            debug_print(f'rest {rest}', debug)
+            debug_print(f'[Turn in Place] rest {rest}', debug)
 
 
 def my_go_to_pose1(robot, x, y, angle_z, debug = False):

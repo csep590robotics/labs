@@ -70,8 +70,8 @@ def get_distance_between_wheels():
     # Results is in helper/results/get_distance_between_wheel.txt
     #   The test test with different speed and it's mutiplicatoin
     #   Also for each speed, test with multiple time with the differnt of duration
-    #   The total average is 88.03572726050415
-    return 88
+    #   The total average is: 80.84659110426436
+    return 80.85
 
 
 def rotate_front_wheel(robot, angle_deg):

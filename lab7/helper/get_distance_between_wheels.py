@@ -31,19 +31,19 @@ async def get_distance_between_wheels(robot: cozmo.robot.Robot, speed: int, debu
     bArray = []
     last_phi = Angle(degrees=0)
     for duration in range(1, 7):
-        # Turn right with right wheel as point, b is the distance between wheels
+        # Turn right with center of wheel as point, b is the distance between wheels
         # So
-        #   phi * b = speed * time
+        #   phi * (b / 2) = speed * time
         # And because
         #   phi = old_robot_angle - new_robot_angle
         #   ==>
-        #   b = speed * time / (old_robot_angle - new_robot_angle)
+        #   b = speed * time / (old_robot_angle - new_robot_angle) * 2
         oldPose = robot.pose
-        await robot.drive_wheels(speed, 0, duration=duration)
+        await robot.drive_wheels(speed, -speed, duration=duration)
         newPose = robot.pose
         phi = normalize_angle_and_minus(newPose.rotation.angle_z, oldPose.rotation.angle_z)
 
-        #   Use the delta of the value to ingore the ramp up time or friction
+        #   Use the delta of the value to ingore the warm up time or friction
         delta_phi = phi - last_phi
         last_phi = phi
         if duration < 3:    #   Skip the test data because when duration less than 3, the value is not accurate
@@ -53,11 +53,15 @@ async def get_distance_between_wheels(robot: cozmo.robot.Robot, speed: int, debu
             print(f"phi: {phi}")
             print(f"delta_phi: {delta_phi}")
 
-        if delta_phi.radians < 0.1:
+        if delta_phi.abs_value.radians < 0.1:
             print('Wrong data, ignore')
             continue
 
-        b = (speed * 1) / delta_phi.abs_value.radians
+        b = (speed * 1) / delta_phi.abs_value.radians * 2
+        if b > 100 or b < 40:
+            print('Wrong data, ignore')
+            continue
+
         print(f"With speed {speed} and time {duration}, the distance between wheels: by phi {b}")
         bArray.append(b)
     print(f'Average B: {mean(bArray)} with speed {speed}')

@@ -113,12 +113,12 @@ def my_drive_straight(robot, dist, speed, debug = False):
             speed = get_number_signal(speed) * rest
             debug_print(f"[Drive Straight] lower speed to {speed}", debug)
         elif rest - abs(speed) < 10:     # Cannot move when distance is small
-            speed = get_number_signal(speed) * rest + 10
+            speed = get_number_signal(speed) * (rest + 10)
             debug_print(f"[Drive Straight] higher speed to {speed}", debug)
         elif rest - abs(speed) < 30:     # Cannot move when distance is small
             speed = get_number_signal(speed) * rest
             debug_print(f"[Drive Straight] higher speed to {speed}", debug)
-        robot.drive_wheels(speed, speed, 0, 0, duration=max(rest / abs(speed), 1))
+        robot.drive_wheels(speed, speed, 0, 0, duration=DRIVE_WHEELS_WARM_UP_SECOND + max(rest / abs(speed), 1))
         time.sleep(DRIVE_WHEELS_WARM_UP_SECOND)
         new_position = robot.pose.position.x
         if debug:
@@ -174,8 +174,8 @@ def my_turn_in_place(robot, angle, speed, debug = False):
         if rest < abs(speed) - 1:
             speed = get_number_signal(speed) * rest
             debug_print(f'[Turn in Place] lower speed to {speed}', debug)
-        if rest - abs(speed) < 20: # Cannot turn when degree is small
-            speed = get_number_signal(speed) * rest + 15
+        if rest < 20 and rest - abs(speed) < 20: # Cannot turn when degree is small
+            speed = get_number_signal(speed) * (rest + 15)
             debug_print(f'[Turn in Place] higher speed to {speed}', debug)
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + max(rest / abs(speed), 1))
@@ -207,12 +207,12 @@ def my_go_to_pose1(robot, x, y, angle_z, debug = False):
     debug_print(angle, debug)
 
     # Turn in place to point to new point
-    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
+    my_turn_in_place(robot, angle, max(abs(angle / 2), 50), debug)
     # Move
-    my_drive_straight(robot, distance, max(30, distance / 3), debug)
+    my_drive_straight(robot, distance, max(50, distance / 3), debug)
     # Turn in place to match angle_z
     angle = angle_z - angle
-    my_turn_in_place(robot, angle, max(abs(angle / 2), 30), debug)
+    my_turn_in_place(robot, angle, max(abs(angle / 2), 50), debug)
 
 
 def my_go_to_pose2(robot, x, y, angle_z, debug = False):
@@ -241,13 +241,13 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
     if y > 0:
         length_l = (r - get_distance_between_wheels() / 2) * (angle * 2)
         length_r = (r + get_distance_between_wheels() / 2) * (angle * 2)
-        speed_l = max(30, length_l / 3)
+        speed_l = max(75, length_l / 2)
         duration = length_l / speed_l
         speed_r = length_r / duration
     else:
         length_l = (r + get_distance_between_wheels() / 2) * (angle * 2)
         length_r = (r - get_distance_between_wheels() / 2) * (angle * 2)
-        speed_r = max(30, length_r / 3)
+        speed_r = max(75, length_r / 2)
         duration = length_r / speed_r
         speed_l = length_l / duration
     debug_print(f"r: {r}", debug)
@@ -255,14 +255,14 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
     debug_print(f"speed_l: {speed_l}", debug)
     debug_print(f"speed_r: {speed_r}", debug)
     # Move
-    robot.drive_wheels(speed_l, speed_r, duration = duration)
+    robot.drive_wheels(speed_l, speed_r, duration = DRIVE_WHEELS_WARM_UP_SECOND + duration)
     time.sleep(DRIVE_WHEELS_WARM_UP_SECOND)
     # Turn in place to match angle_z
     debug_print(f"angle_z: {angle_z}", debug)
     debug_print(f"angle: {math.degrees(angle)}", debug)
     angle_z = angle_z - get_number_signal(y) * math.degrees(angle * 2)
     debug_print(f"new_angle_z: {angle_z}", debug)
-    my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 30), debug)
+    my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 50), debug)
 
 
 def my_go_to_pose3(robot, x, y, angle_z, debug = False):
@@ -286,7 +286,7 @@ def my_go_to_pose3(robot, x, y, angle_z, debug = False):
     if abs(theta) > 90:
         turn_angle = theta - get_number_signal(theta) * 90
         debug_print(f"Turn {turn_angle} first to have less movement", debug)
-        my_turn_in_place(robot, turn_angle, max(abs(turn_angle / 2), 30), debug)
+        my_turn_in_place(robot, turn_angle, max(abs(turn_angle / 2), 50), debug)
         x = 0
         y = get_number_signal(y) * distance
         angle_z = angle_z - turn_angle

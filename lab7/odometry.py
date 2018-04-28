@@ -309,60 +309,60 @@ def run(robot: cozmo.robot.Robot):
     print(f"***** Distance between wheels: {get_distance_between_wheels()}")
 
     # Example tests of the functions
-    # for angle in range(15, 181, 15):
-    #     old_position = robot.pose.position.x
-    #     rotate_front_wheel(robot, angle)
-    #     new_position = robot.pose.position.x
-    #     distance = get_front_wheel_radius() * math.radians(angle)
-    #     if (new_position - old_position > distance - 2) and (new_position - old_position < distance + 2):
-    #         print(f'[rotate_front_wheel] Good in angle: {angle}')
-    #     else:
-    #         print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
+    for angle in range(15, 181, 15):
+        old_position = robot.pose.position.x
+        rotate_front_wheel(robot, angle)
+        new_position = robot.pose.position.x
+        distance = get_front_wheel_radius() * math.radians(angle)
+        if (new_position - old_position > distance - 2) and (new_position - old_position < distance + 2):
+            print(f'[rotate_front_wheel] Good in angle: {angle}')
+        else:
+            print(f'[rotate_front_wheel] Wrong in angle: {angle}, delta {abs(new_position - old_position - distance)}')
 
-    # cozmo_drive_straight(robot, 62, 50)
-    # for distance in range(50, 100, 15):
-    #     for speed in range(20, 50, 10):
-    #         old_position = robot.pose.position.x
-    #         my_drive_straight(robot, distance, speed, True)
-    #         new_position = robot.pose.position.x
-    #         if (new_position - old_position > distance - 10) and (new_position - old_position < distance + 10):
-    #             print(f'[my_drive_straight] Good in distance: {distance}, speed: {speed}')
-    #         else:
-    #             print(f'[my_drive_straight] Wrong in distance: {distance}, speed: {speed}, delta {new_position - old_position - distance}')
+    cozmo_drive_straight(robot, 62, 50)
+    for distance in range(50, 100, 15):
+        for speed in range(20, 50, 10):
+            old_position = robot.pose.position.x
+            my_drive_straight(robot, distance, speed, True)
+            new_position = robot.pose.position.x
+            if (new_position - old_position > distance - 10) and (new_position - old_position < distance + 10):
+                print(f'[my_drive_straight] Good in distance: {distance}, speed: {speed}')
+            else:
+                print(f'[my_drive_straight] Wrong in distance: {distance}, speed: {speed}, delta {new_position - old_position - distance}')
 
-    # cozmo_turn_in_place(robot, 60, 30)
-    # for angle in range(30, 181, 30):
-    #     for speed in range(30, 61, 15):
-    #         old_angle = robot.pose.rotation.angle_z.degrees
-    #         if old_angle < 0:
-    #             old_angle += 360
-    #         my_turn_in_place(robot, angle, speed, True)
-    #         new_angle = robot.pose.rotation.angle_z.degrees
-    #         if new_angle < 0:
-    #             new_angle += 360
-    #         delta = new_angle - old_angle
-    #         if delta < 0:
-    #             delta += 360
-    #         if (delta > angle - 10) and (delta < angle + 10):
-    #             print(f'[my_turn_in_place] Good in angle: {angle}, speed: {speed}')
-    #         else:
-    #             print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
+    cozmo_turn_in_place(robot, 60, 30)
+    for angle in range(30, 181, 30):
+        for speed in range(30, 61, 15):
+            old_angle = robot.pose.rotation.angle_z.degrees
+            if old_angle < 0:
+                old_angle += 360
+            my_turn_in_place(robot, angle, speed, True)
+            new_angle = robot.pose.rotation.angle_z.degrees
+            if new_angle < 0:
+                new_angle += 360
+            delta = new_angle - old_angle
+            if delta < 0:
+                delta += 360
+            if (delta > angle - 10) and (delta < angle + 10):
+                print(f'[my_turn_in_place] Good in angle: {angle}, speed: {speed}')
+            else:
+                print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
 
-    # my_go_to_pose1(robot, 100, 0, 45, True)
-    # my_go_to_pose1(robot, -100, 0, -45, True)
-    # my_go_to_pose1(robot, 100, -100, -90, True)
+    my_go_to_pose1(robot, 100, 0, 45, True)
+    my_go_to_pose1(robot, -100, 0, -45, True)
+    my_go_to_pose1(robot, 100, -100, -90, True)
 
-    # my_go_to_pose2(robot, 100, 0, 45, True)
-    # my_go_to_pose2(robot, 100, 100, 45, True)
-    # my_go_to_pose2(robot, 100, -100, 45, True)
-    # my_go_to_pose2(robot, -100, -100, 45, True)
-    # my_go_to_pose2(robot, 0, -150, 45, True)
+    my_go_to_pose2(robot, 100, 0, 45, True)
+    my_go_to_pose2(robot, 100, 100, 45, True)
+    my_go_to_pose2(robot, 100, -100, 45, True)
+    my_go_to_pose2(robot, -100, -100, 45, True)
+    my_go_to_pose2(robot, 0, -150, 45, True)
 
-    # cozmo_go_to_pose(robot, 100, 0, 45)
-    # cozmo_go_to_pose(robot, 100, 100, 45)
-    # cozmo_go_to_pose(robot, 100, -100, 45)
-    # cozmo_go_to_pose(robot, -100, -100, 45)
-    # cozmo_go_to_pose(robot, 0, -150, 45)
+    cozmo_go_to_pose(robot, 100, 0, 45)
+    cozmo_go_to_pose(robot, 100, 100, 45)
+    cozmo_go_to_pose(robot, 100, -100, 45)
+    cozmo_go_to_pose(robot, -100, -100, 45)
+    cozmo_go_to_pose(robot, 0, -150, 45)
 
     my_go_to_pose3(robot, 100, 0, 45, True)
     my_go_to_pose3(robot, 100, 100, 45, True)

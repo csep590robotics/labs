@@ -18,9 +18,9 @@ from pose_transform import get_relative_pose
 
 # Experiment warm up second for Cozmo Drive Wheels function,
 # found by was determined by helper/understand_drive_wheels.py
-# results is in helper/results/understand_drive_wheels.txt should be 0.8
+# results is in helper/results/understand_drive_wheels.txt should be 0.9
 # But for the length test, this should be 0.5
-DRIVE_WHEELS_WARM_UP_SECOND = 0.5
+DRIVE_WHEELS_WARM_UP_SECOND = 0.9
 
 def cozmo_drive_straight(robot, dist, speed):
     """Drives the robot straight.
@@ -143,7 +143,7 @@ def my_turn_in_place(robot, angle, speed, debug = False):
 
     if speed <= 0:
         robot.say_text('Cannot do that').wait_for_completed()
-    if angle == 0:
+    if abs(angle) <= 5:
         return
 
     while angle > 360:  # Reduce the turning angle
@@ -175,17 +175,20 @@ def my_turn_in_place(robot, angle, speed, debug = False):
             delta += 360
         rest = angle - delta
         debug_print(f'[Turn in Place] rest {rest}', debug)
-        if abs(rest) < 5 or rest < 0:
+        if abs(rest) < 7 or rest < 0:
             break
         if rest < abs(speed) - 1:
             speed = get_number_signal(speed) * rest
             debug_print(f'[Turn in Place] lower speed to {speed}', debug)
-        if rest < 20 and rest - abs(speed) < 20: # Cannot turn when degree is small
+        if rest < 31 and rest - abs(speed) < 20: # Cannot turn when degree is small
             speed = get_number_signal(speed) * (rest + 15)
             debug_print(f'[Turn in Place] higher speed to {speed}', debug)
+        if abs(speed) < 35: # Cannot turn when degree is small
+            speed = get_number_signal(speed) * (35)
+            debug_print(f'[Turn in Place] higher speed 2 to {speed}', debug)
         speed_mm = (get_distance_between_wheels() / 2) * math.radians(speed)
         robot.drive_wheels(-speed_mm, speed_mm, duration=DRIVE_WHEELS_WARM_UP_SECOND + max(rest / abs(speed), 1))
-        time.sleep(DRIVE_WHEELS_WARM_UP_SECOND)
+        time.sleep(0.2)
         new_angle = robot.pose.rotation.angle_z.degrees
         if new_angle < 0:
             new_angle += 360
@@ -343,22 +346,27 @@ def run(robot: cozmo.robot.Robot):
                     print(f'[my_drive_straight_test] Wrong in distance: {dist}, speed: {speed}, delta {moved - distance}')
 
     cozmo_turn_in_place(robot, 60, 30)
-    for angle in range(30, 181, 30):
+    for orignal_angle in range(30, 181, 30):
         for speed in range(30, 61, 15):
-            old_angle = robot.pose.rotation.angle_z.degrees
-            if old_angle < 0:
-                old_angle += 360
-            my_turn_in_place(robot, angle, speed, True)
-            new_angle = robot.pose.rotation.angle_z.degrees
-            if new_angle < 0:
-                new_angle += 360
-            delta = new_angle - old_angle
-            if delta < 0:
-                delta += 360
-            if (delta > angle - 10) and (delta < angle + 10):
-                print(f'[my_turn_in_place] Good in angle: {angle}, speed: {speed}')
-            else:
-                print(f'[my_turn_in_place] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta - angle)}')
+            for signal in range(-1, 2, 2):
+                angle = signal * orignal_angle
+                old_angle = robot.pose.rotation.angle_z.degrees
+                if old_angle < 0:
+                    old_angle += 360
+                my_turn_in_place(robot, angle, speed)
+                new_angle = robot.pose.rotation.angle_z.degrees
+                if new_angle < 0:
+                    new_angle += 360
+                if (new_angle > old_angle):
+                    delta = new_angle - old_angle
+                else:
+                    delta = old_angle - new_angle
+                if delta > 180:
+                    delta -= 360
+                if abs(abs(delta) - abs(angle)) < 10:
+                    print(f'[my_turn_in_place_test] Good in angle: {angle}, speed: {speed}')
+                else:
+                    print(f'[my_turn_in_place_test] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta) - abs(angle)}')
 
     my_go_to_pose1(robot, 100, 0, 45, True)
     my_go_to_pose1(robot, -100, 0, -45, True)

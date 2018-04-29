@@ -231,57 +231,60 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
             x,y -- Desired position of the robot in millimeters
             angle_z -- Desired rotation of the robot around the vertical axis in degrees
     """
-    if y == 0:
-        my_go_to_pose1(robot, x, y, angle_z, debug)
+    debug_print(f"[Go to Pose2] Go to position ({x}, {y}), angle degree: {angle_z}", debug)
+    if x == 0 and y == 0:
+        my_turn_in_place(robot, angle_z, angle_z, debug)
         return
 
-    distance = math.sqrt(x * x + y * y)
-    angle = math.atan2(abs(y), x)
-    debug_print(f"distance: {distance}", debug)
-    debug_print(f"angle: {math.degrees(angle)}", debug)
-    # Circle Radius
-    # theta = angle * 2
-    # (distance / 2) : r = sin(theta / 2)
-    # r = (distance / 2) / sin(theta / 2)
-    r = (distance / 2) / math.sin(angle)
-    # while turn left (y > 0):
-    #   Arc length left = (r - b / 2) * (theta)
-    #   Arc length right = (r + b / 2) * (theta)
-    if y > 0:
-        length_l = (r - get_distance_between_wheels() / 2) * (angle * 2)
-        length_r = (r + get_distance_between_wheels() / 2) * (angle * 2)
-        speed_l = 50
-        duration = length_l / speed_l
-        speed_r = length_r / duration
-        if speed_r > 100:
-            speed_r = 100
-            duration = length_r / speed_r
-            speed_l = length_l / duration
-    else:
-        length_l = (r + get_distance_between_wheels() / 2) * (angle * 2)
-        length_r = (r - get_distance_between_wheels() / 2) * (angle * 2)
-        speed_r = 50
-        duration = length_r / speed_r
-        speed_l = length_l / duration
-        if speed_l > 100:
-            speed_l = 100
-            duration = length_l / speed_l
-            speed_r = length_r / duration
-    debug_print(f"r: {r}", debug)
-    debug_print(f"length_l: {length_l}", debug)
-    debug_print(f"length_r: {length_r}", debug)
-    debug_print(f"duration: {duration}", debug)
-    debug_print(f"speed_l: {speed_l}", debug)
-    debug_print(f"speed_r: {speed_r}", debug)
-    # Move
-    robot.drive_wheels(speed_l, speed_r, duration = 0.8 + duration)
-    time.sleep(0.8)
-    # Turn in place to match angle_z
-    debug_print(f"angle_z: {angle_z}", debug)
-    debug_print(f"angle: {math.degrees(angle)}", debug)
-    angle_z = angle_z - get_number_signal(y) * math.degrees(angle * 2)
-    debug_print(f"new_angle_z: {angle_z}", debug)
-    my_turn_in_place(robot, angle_z, max(abs(angle_z / 2), 50), debug)
+    world_old_position = robot.pose
+    distance = math.sqrt(x**2 + y**2)
+    while True:
+        debug_print("======================================================", debug)
+        world_new_position = robot.pose
+        robot_pose = get_relative_pose(world_new_position, world_old_position)
+        debug_print(f"[Go to Pose2] Robot at ({robot_pose.position.x}, {robot_pose.position.y}), angle degree: {robot_pose.rotation.angle_z.degrees}", debug)
+
+        delta_x = x - robot_pose.position.x
+        delta_y = y - robot_pose.position.y
+
+        rho = math.sqrt(delta_x**2 + delta_y**2)
+        if abs(delta_x) < 5:
+            alpha = get_number_signal(delta_y) * math.pi
+        else:
+            alpha = math.atan2(delta_y, delta_x) - robot_pose.rotation.angle_z.radians
+        eta = math.radians(angle_z) - robot_pose.rotation.angle_z.radians
+
+        if abs(rho) < 10 and abs(math.degrees(eta)) < 5:
+            robot.stop_all_motors()
+            break
+
+        debug_print("[Go to Pose2] Errors:", debug)
+        debug_print(f"[Go to Pose2] rho: {rho}", debug)
+        debug_print(f"[Go to Pose2] alpha: {alpha}, degrees: {math.degrees(alpha)}", debug)
+        debug_print(f"[Go to Pose2] eta: {eta}, degrees: {math.degrees(eta)}", debug)
+
+        p1 = 0.1
+        if rho < distance / 4:
+            p2 = 0.1
+            p3 = 0.3
+        elif rho > distance / 4 * 3:
+            p2 = 0.1
+            p3 = -0.3
+        else:
+            p2 = 0.2
+            p3 = 0.2
+
+        move_speed = min(p1 * rho, 30)
+        rotation_speed = p2 * alpha + p3 * eta
+        debug_print(f"[Go to Pose2] Move Speed: {move_speed}, Rotation Degrees: {math.degrees(rotation_speed)}", debug)
+
+        rotation_speed_mm = rotation_speed * get_distance_between_wheels() / 2
+        left_speed = move_speed - rotation_speed_mm
+        right_speed = move_speed + rotation_speed_mm
+        debug_print(f"[Go to Pose2] Left Speed: {left_speed}, Right Speed: {right_speed}", debug)
+
+        robot.drive_wheels(left_speed, right_speed)
+        time.sleep(0.5)
 
 
 def my_go_to_pose3(robot, x, y, angle_z, debug = False):
@@ -315,7 +318,10 @@ def my_go_to_pose3(robot, x, y, angle_z, debug = False):
 
 
 def get_number_signal(number: float):
-    return number / abs(number)
+    if number == 0:
+        return 1
+    else:
+        return number / abs(number)
 
 
 def debug_print(message: str, debug = False):
@@ -328,97 +334,98 @@ def run(robot: cozmo.robot.Robot):
     print(f"***** Distance between wheels: {get_distance_between_wheels()}")
 
     # Example tests of the functions
-    for angle in range(15, 181, 15):
-        old_position = robot.pose
-        rotate_front_wheel(robot, angle)
-        new_position = robot.pose
-        related_pose = get_relative_pose(new_position, old_position)
-        moved = abs(math.sqrt(related_pose.position.x**2 + related_pose.position.y**2))
-        distance = get_front_wheel_radius() * math.radians(angle)
-        if abs(moved - distance) < 3:
-            print(f'[rotate_front_wheel_test] Good in angle: {angle}')
-        else:
-            print(f'[rotate_front_wheel_test] Wrong in angle: {angle}, delta {abs(moved - distance)}')
+    # for angle in range(15, 181, 15):
+    #     old_position = robot.pose
+    #     rotate_front_wheel(robot, angle)
+    #     new_position = robot.pose
+    #     related_pose = get_relative_pose(new_position, old_position)
+    #     moved = abs(math.sqrt(related_pose.position.x**2 + related_pose.position.y**2))
+    #     distance = get_front_wheel_radius() * math.radians(angle)
+    #     if abs(moved - distance) < 3:
+    #         print(f'[rotate_front_wheel_test] Good in angle: {angle}')
+    #     else:
+    #         print(f'[rotate_front_wheel_test] Wrong in angle: {angle}, delta {abs(moved - distance)}')
 
-    cozmo_drive_straight(robot, 62, 50)
-    for distance in range(50, 100, 15):
-        for speed in range(20, 50, 10):
-            for signal in range(-1, 2, 2):
-                dist = signal * distance
-                old_position = robot.pose
-                my_drive_straight(robot, dist, speed)
-                new_position = robot.pose
-                related_pose = get_relative_pose(new_position, old_position)
-                moved = abs(math.sqrt(related_pose.position.x**2 + related_pose.position.y**2))
-                if abs(moved - distance) < 10:
-                    print(f'[my_drive_straight_test] Good in distance: {dist}, speed: {speed}')
-                else:
-                    print(f'[my_drive_straight_test] Wrong in distance: {dist}, speed: {speed}, delta {moved - distance}')
+    # cozmo_drive_straight(robot, 62, 50)
+    # for distance in range(50, 100, 15):
+    #     for speed in range(20, 50, 10):
+    #         for signal in range(-1, 2, 2):
+    #             dist = signal * distance
+    #             old_position = robot.pose
+    #             my_drive_straight(robot, dist, speed)
+    #             new_position = robot.pose
+    #             related_pose = get_relative_pose(new_position, old_position)
+    #             moved = abs(math.sqrt(related_pose.position.x**2 + related_pose.position.y**2))
+    #             if abs(moved - distance) < 10:
+    #                 print(f'[my_drive_straight_test] Good in distance: {dist}, speed: {speed}')
+    #             else:
+    #                 print(f'[my_drive_straight_test] Wrong in distance: {dist}, speed: {speed}, delta {moved - distance}')
 
-    cozmo_turn_in_place(robot, 60, 30)
-    for orignal_angle in range(30, 181, 30):
-        for speed in range(30, 61, 15):
-            for signal in range(-1, 2, 2):
-                angle = signal * orignal_angle
-                old_angle = robot.pose.rotation.angle_z.degrees
-                if old_angle < 0:
-                    old_angle += 360
-                my_turn_in_place(robot, angle, speed)
-                new_angle = robot.pose.rotation.angle_z.degrees
-                if new_angle < 0:
-                    new_angle += 360
-                if (new_angle > old_angle):
-                    delta = new_angle - old_angle
-                else:
-                    delta = old_angle - new_angle
-                if delta > 180:
-                    delta -= 360
-                if abs(abs(delta) - abs(angle)) < 10:
-                    print(f'[my_turn_in_place_test] Good in angle: {angle}, speed: {speed}')
-                else:
-                    print(f'[my_turn_in_place_test] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta) - abs(angle)}')
+    # cozmo_turn_in_place(robot, 60, 30)
+    # for orignal_angle in range(30, 181, 30):
+    #     for speed in range(30, 61, 15):
+    #         for signal in range(-1, 2, 2):
+    #             angle = signal * orignal_angle
+    #             old_angle = robot.pose.rotation.angle_z.degrees
+    #             if old_angle < 0:
+    #                 old_angle += 360
+    #             my_turn_in_place(robot, angle, speed)
+    #             new_angle = robot.pose.rotation.angle_z.degrees
+    #             if new_angle < 0:
+    #                 new_angle += 360
+    #             if (new_angle > old_angle):
+    #                 delta = new_angle - old_angle
+    #             else:
+    #                 delta = old_angle - new_angle
+    #             if delta > 180:
+    #                 delta -= 360
+    #             if abs(abs(delta) - abs(angle)) < 10:
+    #                 print(f'[my_turn_in_place_test] Good in angle: {angle}, speed: {speed}')
+    #             else:
+    #                 print(f'[my_turn_in_place_test] Wrong in angle: {angle}, speed: {speed}, delta {abs(delta) - abs(angle)}')
 
-    my_go_to_pose1(robot, 100, 0, 45, True)
-    my_go_to_pose1(robot, -100, 0, -45, True)
-    my_go_to_pose1(robot, 100, -100, -90, True)
+    # my_go_to_pose1(robot, 100, 0, 45, True)
+    # my_go_to_pose1(robot, -100, 0, -45, True)
+    # my_go_to_pose1(robot, 100, -100, -90, True)
 
-    for x in range(-100, 101, 100):
-        for y in range(-100, 101, 100):
-            for angle in range(-90, 91, 45):
-                old_pose = robot.pose
-                print(f'Old Pose: {old_pose}')
-                my_go_to_pose2(robot, x, y, angle, True)
-                new_pose = robot.pose
-                print(f'New Pose: {new_pose}')
-                related_pose = get_relative_pose(new_pose, old_pose)
-                print(f'Related Pose: {related_pose}')
-                print(f'[Go to Pose2] Move x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
-                delta_x = related_pose.position.x - x
-                delta_y = related_pose.position.y - y
-                delta_angle = related_pose.rotation.angle_z.degrees - angle
-                if abs(delta_x) < 5 and abs(delta_y) < 5 and abs(delta_angle) < 5:
-                    print(f'[Go to Pose2] Good in x: {x}, y: {y}, angle: {angle}')
-                else:
-                    print(f'[Go to Pose2] Wrong in x: {x} (delta {delta_x}), y: {y} (delta {delta_y}), angle: {angle} (delta {delta_angle})')
-                return
+    # for x in range(-100, 101, 100):
+    #     for y in range(-100, 101, 100):
+    #         for angle in range(-90, 91, 45):
+    #             old_pose = robot.pose
+    #             print(f'Old Pose: {old_pose}')
+    #             my_go_to_pose2(robot, x, y, angle, True)
+    #             new_pose = robot.pose
+    #             print(f'New Pose: {new_pose}')
+    #             related_pose = get_relative_pose(new_pose, old_pose)
+    #             print(f'Related Pose: {related_pose}')
+    #             print(f'[Go to Pose2] Move x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
+    #             delta_x = related_pose.position.x - x
+    #             delta_y = related_pose.position.y - y
+    #             delta_angle = related_pose.rotation.angle_z.degrees - angle
+    #             if abs(delta_x) < 5 and abs(delta_y) < 5 and abs(delta_angle) < 5:
+    #                 print(f'[Go to Pose2] Good in x: {x}, y: {y}, angle: {angle}')
+    #             else:
+    #                 print(f'[Go to Pose2] Wrong in x: {x} (delta {delta_x}), y: {y} (delta {delta_y}), angle: {angle} (delta {delta_angle})')
+    #             return
 
+    # my_go_to_pose2(robot, 0, 0, 45, True)
     my_go_to_pose2(robot, 100, 0, 45, True)
-    my_go_to_pose2(robot, 100, 100, 45, True)
-    my_go_to_pose2(robot, 100, -100, 45, True)
-    my_go_to_pose2(robot, -100, -100, 45, True)
-    my_go_to_pose2(robot, 0, -150, 45, True)
+    # my_go_to_pose2(robot, 100, 100, 45, True)
+    # my_go_to_pose2(robot, 100, -100, 45, True)
+    # my_go_to_pose2(robot, -100, -100, 45, True)
+    # my_go_to_pose2(robot, 0, -150, 45, True)
 
-    cozmo_go_to_pose(robot, 100, 0, 45)
-    cozmo_go_to_pose(robot, 100, 100, 45)
-    cozmo_go_to_pose(robot, 100, -100, 45)
-    cozmo_go_to_pose(robot, -100, -100, 45)
-    cozmo_go_to_pose(robot, 0, -150, 45)
+    # cozmo_go_to_pose(robot, 100, 0, 45)
+    # cozmo_go_to_pose(robot, 100, 100, 45)
+    # cozmo_go_to_pose(robot, 100, -100, 45)
+    # cozmo_go_to_pose(robot, -100, -100, 45)
+    # cozmo_go_to_pose(robot, 0, -150, 45)
 
-    my_go_to_pose3(robot, 100, 0, 45, True)
-    my_go_to_pose3(robot, 100, 100, 45, True)
-    my_go_to_pose3(robot, 100, -100, 45, True)
-    my_go_to_pose3(robot, -100, -100, 45, True)
-    my_go_to_pose3(robot, 0, -150, 45, True)
+    # my_go_to_pose3(robot, 100, 0, 45, True)
+    # my_go_to_pose3(robot, 100, 100, 45, True)
+    # my_go_to_pose3(robot, 100, -100, 45, True)
+    # my_go_to_pose3(robot, -100, -100, 45, True)
+    # my_go_to_pose3(robot, 0, -150, 45, True)
 
 
 if __name__ == '__main__':

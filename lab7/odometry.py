@@ -248,7 +248,7 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         delta_y = y - robot_pose.position.y
 
         rho = math.sqrt(delta_x**2 + delta_y**2)
-        if abs(delta_x) < 5:
+        if delta_x == 0:
             alpha = get_number_signal(delta_y) * math.pi
         else:
             alpha = normalize_angle(math.atan2(delta_y, delta_x) - robot_pose.rotation.angle_z.radians)

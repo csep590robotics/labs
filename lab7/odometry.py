@@ -323,22 +323,17 @@ def my_go_to_pose3(robot, x, y, angle_z, debug = False):
     # Find out when the angle is larger than 90 degree,
     # cozmo_go_to_pose() function will turn first
     # ####
-    if y == 0:
-        my_go_to_pose1(robot, x, y, angle_z, debug)
-        return
-
     distance = math.sqrt(x * x + y * y)
     theta = get_number_signal(y) * math.degrees(math.atan2(abs(y), x))
-    debug_print(f"angle {theta}", debug)
     if abs(theta) > 90:
-        turn_angle = theta - get_number_signal(theta) * 90
-        debug_print(f"Turn {turn_angle} first to have less movement", debug)
+        turn_angle = theta
+        debug_print(f"[Go to Pose3] Turn {turn_angle} first to have less movement", debug)
         my_turn_in_place(robot, turn_angle, max(abs(turn_angle / 2), 50), debug)
         #   Turn first and adjust the coordinate
-        x = 0
-        y = get_number_signal(y) * distance
+        x = distance
+        y = 0
         angle_z = angle_z - turn_angle
-        debug_print(f"After turn adjust x: {x}, y: {y}, angle: {angle_z}", debug)
+        debug_print(f"[Go to Pose3] After turn adjust x: {x}, y: {y}, angle: {angle_z}", debug)
 
     my_go_to_pose2(robot, x, y, angle_z, debug)
 

@@ -251,30 +251,42 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         if abs(delta_x) < 5:
             alpha = get_number_signal(delta_y) * math.pi
         else:
-            alpha = math.atan2(delta_y, delta_x) - robot_pose.rotation.angle_z.radians
-        eta = math.radians(angle_z) - robot_pose.rotation.angle_z.radians
-
-        if abs(rho) < 10 and abs(math.degrees(eta)) < 5:
-            robot.stop_all_motors()
-            break
+            alpha = normalize_angle(math.atan2(delta_y, delta_x) - robot_pose.rotation.angle_z.radians)
+        eta = normalize_angle(math.radians(angle_z) - robot_pose.rotation.angle_z.radians)
 
         debug_print("[Go to Pose2] Errors:", debug)
         debug_print(f"[Go to Pose2] rho: {rho}", debug)
         debug_print(f"[Go to Pose2] alpha: {alpha}, degrees: {math.degrees(alpha)}", debug)
         debug_print(f"[Go to Pose2] eta: {eta}, degrees: {math.degrees(eta)}", debug)
 
-        p1 = 0.1
-        if rho < distance / 4:
+        if abs(rho) < 10 and abs(math.degrees(eta)) < 10:
+            robot.stop_all_motors()
+            debug_print("[Go to Pose2] Stop", debug)
+            break
+        elif abs(rho) < 10:
+            #   Stop the movement and just turn to the right angle.
+            #   If not stop at this time, due Cozmo's motor and slip, might run into too long time
+            debug_print("[Go to Pose2] Stop", debug)
+            robot.stop_all_motors()
+            debug_print(f"[Go to Pose2] Turn {math.degrees(eta)}", debug)
+            my_turn_in_place(robot, math.degrees(eta), debug)
+            break
+
+        p1 = 0.2
+        # more focus on direction when far from goal
+        # more focus on heading when near the goal
+        if rho > distance / 5 * 3:
+            p2 = 0.3
+            p3 = 0.1
+        elif rho < distance / 5:
             p2 = 0.1
             p3 = 0.3
-        elif rho > distance / 4 * 3:
-            p2 = 0.1
-            p3 = -0.3
         else:
             p2 = 0.2
             p3 = 0.2
+        debug_print(f"[Go to Pose2] p1: {p1}, p2: {p2}, p3: {p3}", debug)
 
-        move_speed = min(p1 * rho, 30)
+        move_speed = p1 * rho
         rotation_speed = p2 * alpha + p3 * eta
         debug_print(f"[Go to Pose2] Move Speed: {move_speed}, Rotation Degrees: {math.degrees(rotation_speed)}", debug)
 
@@ -284,7 +296,20 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         debug_print(f"[Go to Pose2] Left Speed: {left_speed}, Right Speed: {right_speed}", debug)
 
         robot.drive_wheels(left_speed, right_speed)
-        time.sleep(0.5)
+        if abs(left_speed) < 5 and abs(right_speed) < 5:
+            #   When speed is not that farest, don't change the speed to often
+            #   due Cozmo's motor and slip, might run into too long time and not stop
+            time.sleep(1)
+        else:
+            time.sleep(0.1)
+
+
+def normalize_angle(radians):
+    while radians < -math.pi:
+        radians += 2 * math.pi
+    while radians > math.pi:
+        radians -= 2 * math.pi
+    return radians
 
 
 def my_go_to_pose3(robot, x, y, angle_z, debug = False):
@@ -309,6 +334,7 @@ def my_go_to_pose3(robot, x, y, angle_z, debug = False):
         turn_angle = theta - get_number_signal(theta) * 90
         debug_print(f"Turn {turn_angle} first to have less movement", debug)
         my_turn_in_place(robot, turn_angle, max(abs(turn_angle / 2), 50), debug)
+        #   Turn first and adjust the coordinate
         x = 0
         y = get_number_signal(y) * distance
         angle_z = angle_z - turn_angle
@@ -409,11 +435,11 @@ def run(robot: cozmo.robot.Robot):
     #             return
 
     # my_go_to_pose2(robot, 0, 0, 45, True)
-    my_go_to_pose2(robot, 100, 0, 45, True)
+    # my_go_to_pose2(robot, 100, 0, 45, True)
     # my_go_to_pose2(robot, 100, 100, 45, True)
     # my_go_to_pose2(robot, 100, -100, 45, True)
-    # my_go_to_pose2(robot, -100, -100, 45, True)
-    # my_go_to_pose2(robot, 0, -150, 45, True)
+    # my_go_to_pose2(robot, -100, -100, 135, True)
+    my_go_to_pose2(robot, 0, -150, 45, True)
 
     # cozmo_go_to_pose(robot, 100, 0, 45)
     # cozmo_go_to_pose(robot, 100, 100, 45)

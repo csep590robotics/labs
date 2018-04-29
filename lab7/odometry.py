@@ -266,10 +266,11 @@ def my_go_to_pose2(robot, x, y, angle_z, debug = False):
         elif abs(rho) < 10:
             #   Stop the movement and just turn to the right angle.
             #   If not stop at this time, due Cozmo's motor and slip, might run into too long time
+            #   Also, if every parameter (p1,p2,p3) is good enough, this should not been used
             debug_print("[Go to Pose2] Stop", debug)
             robot.stop_all_motors()
             debug_print(f"[Go to Pose2] Turn {math.degrees(eta)}", debug)
-            my_turn_in_place(robot, math.degrees(eta), debug)
+            my_turn_in_place(robot, math.degrees(eta), abs(math.degrees(eta)), debug)
             break
 
         p1 = 0.2
@@ -412,7 +413,7 @@ def run(robot: cozmo.robot.Robot):
                 my_go_to_pose1(robot, x, y, angle)
                 new_pose = robot.pose
                 related_pose = get_relative_pose(new_pose, old_pose)
-                print(f'[Go to Pose 1 Test] Move x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
+                print(f'[Go to Pose 1 Test] Moved x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
                 delta_x = related_pose.position.x - x
                 delta_y = related_pose.position.y - y
                 delta_angle = related_pose.rotation.angle_z.degrees - angle
@@ -428,7 +429,7 @@ def run(robot: cozmo.robot.Robot):
                 my_go_to_pose2(robot, x, y, angle)
                 new_pose = robot.pose
                 related_pose = get_relative_pose(new_pose, old_pose)
-                print(f'[Go to Pose 2 Test] Move x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
+                print(f'[Go to Pose 2 Test] Moved x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
                 delta_x = related_pose.position.x - x
                 delta_y = related_pose.position.y - y
                 delta_angle = related_pose.rotation.angle_z.degrees - angle
@@ -450,11 +451,11 @@ def run(robot: cozmo.robot.Robot):
                 my_go_to_pose3(robot, x, y, angle)
                 new_pose = robot.pose
                 related_pose = get_relative_pose(new_pose, old_pose)
-                print(f'[Go to Pose 3 Test] Move x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
+                print(f'[Go to Pose 3 Test] Moved x {related_pose.position.x}), y: {related_pose.position.y}, angle: {related_pose.rotation.angle_z.degrees})')
                 delta_x = related_pose.position.x - x
                 delta_y = related_pose.position.y - y
                 delta_angle = related_pose.rotation.angle_z.degrees - angle
-                if abs(delta_x) < 10 and abs(delta_y) < 10 and abs(delta_angle) < 10:
+                if abs(delta_x) < 15 and abs(delta_y) < 15 and abs(delta_angle) < 10:
                     print(f'[Go to Pose 3 Test] Good in x: {x}, y: {y}, angle: {angle}')
                 else:
                     print(f'[Go to Pose 3 Test] Wrong in x: {x} (delta {delta_x}), y: {y} (delta {delta_y}), angle: {angle} (delta {delta_angle})')

@@ -37,22 +37,13 @@ def move_relative_to_cube(robot: cozmo.robot.Robot):
         except asyncio.TimeoutError:
             my_turn_in_place(robot, 30, 50, True)
 
-    CUBE_SIZE = 70
-
     relative_pose = get_relative_pose(cube.pose, robot.pose)
     print(f"Found a cube, pose in the robot coordinate frame: {relative_pose}")
 
-    desired_pose_x_relative_to_cube = CUBE_SIZE * math.cos(cube.pose.rotation.angle_z.abs_value.radians)
-    desired_pose_y_relative_to_cube = CUBE_SIZE * math.sin(cube.pose.rotation.angle_z.abs_value.radians)
-    print(f"Desired pose related to cube coordinate frame: {desired_pose_x_relative_to_cube}, {desired_pose_y_relative_to_cube}")
-    final_pose = Pose(
-        relative_pose.position.x - desired_pose_x_relative_to_cube,
-        relative_pose.position.y + desired_pose_y_relative_to_cube,
-        0,
-        angle_z=relative_pose.rotation.angle_z
-    )
-    print(f"Final pose in the robot coordinate frame: {final_pose}")
-    my_go_to_pose3(robot, final_pose.position.x, final_pose.position.y, final_pose.rotation.angle_z.degrees, True)
+    my_go_to_pose3(robot, relative_pose.position.x, relative_pose.position.y, relative_pose.rotation.angle_z.degrees)
+
+    robot.say_text('Arrived').wait_for_completed()
+    robot.play_anim_trigger(cozmo.anim.Triggers.FistBumpSuccess).wait_for_completed()
 
 
 if __name__ == '__main__':

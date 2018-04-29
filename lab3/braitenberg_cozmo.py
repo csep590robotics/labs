@@ -29,17 +29,16 @@ def sense_brightness(image, columns):
 
 	return avg_brightness
 
-def mapping_funtion(sensor_value):
+def mapping_funtion(sensor_value_l, sensor_value_r):
 	'''Maps a sensor reading to a wheel motor command'''
 	## TODO: Define the mapping to obtain different behaviors.
-	motor_value = 0.1*sensor_value
-	return motor_value
+	return [-0.1*sensor_value_l, -0.1*sensor_value_r]
 
 async def braitenberg_machine(robot: cozmo.robot.Robot):
 	'''The core of the braitenberg machine program'''
 	# Move lift down and tilt the head up
 	robot.move_lift(-3)
-	robot.set_head_angle(cozmo.robot.MAX_HEAD_ANGLE).wait_for_completed()
+	robot.set_head_angle(cozmo.util.Angle(degrees=0.0)).wait_for_completed()
 	print("Press CTRL-C to quit")
 
 	while True:
@@ -63,8 +62,9 @@ async def braitenberg_machine(robot: cozmo.robot.Robot):
 
 		# Map the sensors to actuators
 		## TODO: You might want to switch which sensor is mapped to which motor.
-		motor_right = mapping_funtion(sensor_left)
-		motor_left = mapping_funtion(sensor_right)
+		motors = mapping_funtion(sensor_left, sensor_right)
+		motor_left = motors[0]
+		motor_right = motors[1]
 
 		print("motor_right: " + str(motor_right))
 		print("motor_left: " + str(motor_left))

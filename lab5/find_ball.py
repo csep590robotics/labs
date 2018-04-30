@@ -12,7 +12,7 @@ except ImportError:
     sys.exit('install Pillow to run this code')
 
 
-def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, guessDP=1.55, minCircle=5, maxCircle=160, minDist=40):
+def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=120, minDist=40):
     """Find the ball in an image.
 
             Arguments:
@@ -30,7 +30,6 @@ def find_ball(opencv_image, debug=False, best=None, threshold=100, delta=54, gue
                             delta, guessDP, minCircle, maxCircle, minDist)
 
     if circles is None:
-        ball = np.array([0, 0, 0])
         debugLog("Result - Didn't find any ball", debug)
     else:
         ball = np.round(circles[0, :]).astype("int")
@@ -54,7 +53,7 @@ def debugLog(message, debug=False):
         print(message)
 
 
-def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55, minCircle=5, maxCircle=160, minDist=40):
+def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55, minCircle=10, maxCircle=90, minDist=40):
     number_of_circles_expected = 1
 
     minimum_circle_size = minCircle
@@ -82,8 +81,8 @@ def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55
                 minDist=minDist,
                 param1=50,
                 param2=guess_accumulator_array_threshold,
-                minRadius=(guess_radius - 3),
-                maxRadius=(guess_radius + 3)
+                minRadius=(guess_radius - 5),
+                maxRadius=(guess_radius + 5)
             )
 
             if circles is not None:
@@ -97,7 +96,7 @@ def try_find_ball(gray_image, debug=False, threshold=100, delta=54, guessDP=1.55
             else:
                 debugLog(f"Didn't find circles with guessing radius: {guess_radius} and dp: {guess_dp} vote threshold: {guess_accumulator_array_threshold}", debug)
 
-            guess_radius -= 3
+            guess_radius -= 10
 
         guess_accumulator_array_threshold -= 2
     return None
@@ -121,6 +120,8 @@ def display_circles(opencv_image, circles, best=None):
     circle_image = cv2.cvtColor(circle_image, cv2.COLOR_GRAY2RGB, circle_image)
 
     for c in circles:
+        if c is None:
+            c = np.array([0, 0, 0])
         # draw the outer circle
         cv2.circle(circle_image, (c[0], c[1]), c[2], (255, 255, 0), 2)
         # draw the center of the circle

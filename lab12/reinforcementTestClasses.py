@@ -13,6 +13,7 @@
 
 
 import testClasses
+import functools
 import random, math, traceback, sys, os
 import layout, textDisplay, pacman, gridworld
 import time
@@ -122,7 +123,7 @@ class ValueIterationTest(testClasses.TestCase):
     def runAgent(self, moduleDict, numIterations):
         agent = moduleDict['valueIterationAgents'].ValueIterationAgent(self.grid, discount=self.discount, iterations=numIterations)
         states = self.grid.getStates()
-        actions = list(reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
+        actions = list(functools.reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
         values = {}
         qValues = {}
         policy = {}
@@ -290,7 +291,7 @@ class ApproximateQLearningTest(testClasses.TestCase):
             (endState, reward) = self.env.getRandomNextState(startState, action, randObj=randObj)
             lastExperience = (startState, action, endState, reward)
             agent.update(*lastExperience)
-        actions = list(reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
+        actions = list(functools.reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
         qValues = {}
         weights = agent.getWeights()
         for state in states:
@@ -465,7 +466,7 @@ class QLearningTest(testClasses.TestCase):
             (endState, reward) = self.env.getRandomNextState(startState, action, randObj=randObj)
             lastExperience = (startState, action, endState, reward)
             agent.update(*lastExperience)
-        actions = list(reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
+        actions = list(functools.reduce(lambda a, b: set(a).union(b), [self.grid.getPossibleActions(state) for state in states]))
         values = {}
         qValues = {}
         policy = {}
